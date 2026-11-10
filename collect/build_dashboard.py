@@ -870,7 +870,7 @@ function renderExtract() {
     return;
   }
   var w = V.weights || {}, layers = V.layers || {}, lk = Object.keys(layers);
-  $('#ext-sub').textContent = 'Эталон: ' + num(V.n) + ' постов Telegram, размеченных вручную (' +
+  $('#ext-sub').textContent = 'Эталон: ' + num(V.n) + ' постов Telegram, размеченных моделями по письменным правилам — не человеком (' +
     lk.map(function (k) { return k + ' — ' + layers[k]; }).join(', ') + '); метрики взвешены по долям пула (' +
     lk.map(function (k) { return k + ' ' + pct(w[k]); }).join(', ') + '). Точность — доля объявлений, где поле совпало с эталоном, ' +
     'включая случаи «в тексте этого нет». Полнота — сколько найдено там, где поле есть. Потолок — в какой доле постов поле вообще есть: ' +

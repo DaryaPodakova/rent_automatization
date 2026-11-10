@@ -1,0 +1,132 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "rent_spb/pipeline/card_schema.json",
+  "title": "Карточка объявления об аренде (Санкт-Петербург)",
+  "description": "Что языковая модель извлекает из текста одного объявления. Главное правило: неизвестно ≠ 0. Если в тексте чего-то нет — null или статус «не указано», а не 0 и не догадка. Ноль как число не допускается нигде: «КУ включены», «без комиссии», «без залога» выражаются статусом (включена / нет / нет), а сумма остаётся null. Межполевые правила записаны в allOf ниже; их выполняют и валидатор в n8n (узел «Валидация карточки»), и eval_extraction.py — один и тот же файл, два исполнителя.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "is_offer", "deal", "kind", "rooms", "area_m2", "floor", "floors", "price_rub",
+    "utilities_status", "utilities_rub", "commission_status", "commission_rub", "commission_pct",
+    "deposit_status", "deposit_rub", "metro", "metro_walk_min", "street", "move_from",
+    "red_flags", "author_role", "evidence"
+  ],
+  "properties": {
+    "is_offer": {"type": "boolean", "description": "true — объявление сдаёт жильё, в том числе уже сданное («СДАНА»); false — поиск жилья, реклама, вопрос, флуд."},
+    "is_closed": {"type": "boolean", "description": "Необязательное: true — пометка «СДАНА»/«сдана». Карточка идёт в статистику цен, но не в выдачу пользователю. В эталоне поля нет, eval его не оценивает."},
+    "deal": {"enum": ["long", "short", "daily", "unknown"], "description": "long — «от N месяцев» при N ≥ 11, «надолго», «длительно»; short — «от N месяцев» при N < 11, несколько месяцев, явные даты начала и конца; daily — посуточно; unknown — срок не назван. Шаблон поста (⏱️) важнее комментария, кроме явных дат."},
+    "kind": {"enum": ["квартира", "апартаменты", "комната", "другое", "unknown"], "description": "Шаблон (🛋) важнее текста, кроме «апартаменты»/«апарт-отель» в тексте. Нет слов «квартира/студия/комната/дом», но есть площадь или этаж и нет признаков комнаты/дома — «квартира»; unknown — когда нет и этого."},
+    "rooms": {"enum": ["студия", "1", "2", "3+", null], "description": "Комнат в квартире; для комнаты в квартире — null."},
+    "area_m2": {"type": ["number", "null"], "exclusiveMinimum": 0, "maximum": 1000},
+    "floor": {"type": ["integer", "null"], "minimum": -1, "maximum": 100},
+    "floors": {"type": ["integer", "null"], "minimum": 1, "maximum": 100},
+    "price_rub": {"type": ["integer", "null"], "minimum": 500, "maximum": 2000000, "description": "Аренда в месяц без коммуналки, в рублях. Посуточная или цена явно за другой период — null. Несколько квартир или сезонные цены («170к летом / 130к остальное») — первая."},
+    "utilities_status": {"enum": ["включена", "сумма", "счётчики сверху", "не указано"], "description": "включена — «КУ включены», «всё включено»; сумма — названа сумма коммуналки (диапазон — середина, «до N» — N); счётчики сверху — платится сверху, сумма не названа: «+ к/у», «+ счётчики», «КУ оплачиваются отдельно», «по счётчикам», «включены, кроме счётчиков»; не указано — про коммуналку нет ни слова."},
+    "utilities_rub": {"type": ["integer", "null"], "minimum": 1, "maximum": 100000, "description": "Сумма коммуналки в месяц; только при статусе «сумма» (обязательна) или «счётчики сверху» (если названа ориентировочная сумма счётчиков)."},
+    "commission_status": {"enum": ["нет", "сумма", "процент", "не указано"], "description": "нет — «без комиссии», хэштег «#БЕЗКОМИССИИ», «от собственника»; «на связи агент» без слов о комиссии — не указано."},
+    "commission_rub": {"type": ["integer", "null"], "minimum": 1, "maximum": 2000000, "description": "Обязательна при статусе «сумма»; при «процент» — только если сумма названа в тексте рядом с процентом."},
+    "commission_pct": {"type": ["number", "null"], "exclusiveMinimum": 0, "maximum": 300, "description": "Процент от месячной аренды («комиссия 50%» → 50); только при статусе «процент»."},
+    "deposit_status": {"enum": ["нет", "сумма", "не указано"], "description": "Залог упомянут без суммы («залог есть», «можно разбить») — не указано: статуса «есть, без суммы» нет."},
+    "deposit_rub": {"type": ["integer", "null"], "minimum": 1, "maximum": 2000000, "description": "Только при статусе «сумма»."},
+    "metro": {"type": ["string", "null"], "minLength": 2, "maxLength": 60, "description": "Название станции без слова «метро»."},
+    "metro_walk_min": {"type": ["integer", "null"], "minimum": 0, "maximum": 120, "description": "Минут пешком до метро, если названо в тексте."},
+    "street": {"type": ["string", "null"], "minLength": 2, "maxLength": 80, "description": "Улица без номера дома, как в тексте; цифры в названии остаются («18 линия В.О.», «2-я Советская»)."},
+    "move_from": {"type": ["string", "null"], "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$", "description": "С какой даты можно заехать, YYYY-MM-DD; «сейчас»/«свободна» без даты — null."},
+    "red_flags": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"enum": ["предоплата_без_просмотра", "уход_в_другой_мессенджер", "инструкция_модели_в_тексте", "нет_цены"]}
+    },
+    "author_role": {"enum": ["риэлтор", "собственник", "неизвестно"], "description": "Кто автор объявления. риэлтор — в тексте прямо названы агент / агентство / АН / риэлтор («на связи агент») или названа комиссия (процент, сумма); собственник — прямо названо «собственник», «от хозяина», «без посредников», «на связи собственник»; иначе неизвестно. «Без комиссии» и #БЕЗКОМИССИИ сами по себе собственника не доказывают (так пишут и агентства) — неизвестно. Если есть признаки обеих ролей — риэлтор. Шаблонная строка «Комментарий от наймодателя» ролью не считается."},
+    "evidence": {
+      "type": "object",
+      "description": "Дословные цитаты из текста объявления, на которых основано значение поля.",
+      "additionalProperties": false,
+      "properties": {
+        "price_rub": {"type": "string", "minLength": 1, "maxLength": 200},
+        "utilities_status": {"type": "string", "minLength": 1, "maxLength": 200},
+        "utilities_rub": {"type": "string", "minLength": 1, "maxLength": 200},
+        "commission_status": {"type": "string", "minLength": 1, "maxLength": 200},
+        "commission_rub": {"type": "string", "minLength": 1, "maxLength": 200},
+        "commission_pct": {"type": "string", "minLength": 1, "maxLength": 200},
+        "deposit_status": {"type": "string", "minLength": 1, "maxLength": 200},
+        "deposit_rub": {"type": "string", "minLength": 1, "maxLength": 200},
+        "deal": {"type": "string", "minLength": 1, "maxLength": 200},
+        "author_role": {"type": "string", "minLength": 1, "maxLength": 200}
+      }
+    }
+  },
+  "allOf": [
+    {
+      "$comment": "R1. Коммуналка: сумма обязательна при «сумма»",
+      "if": {"properties": {"utilities_status": {"const": "сумма"}}},
+      "then": {"properties": {"utilities_rub": {"type": "integer"}}}
+    },
+    {
+      "$comment": "R2. Коммуналка: при «включена» и «не указано» суммы нет (включена ≠ 0 рублей числом, не указано ≠ 0)",
+      "if": {"properties": {"utilities_status": {"enum": ["включена", "не указано"]}}},
+      "then": {"properties": {"utilities_rub": {"type": "null"}}}
+    },
+    {
+      "$comment": "R3. Комиссия суммой: сумма обязательна, процента нет",
+      "if": {"properties": {"commission_status": {"const": "сумма"}}},
+      "then": {"properties": {"commission_rub": {"type": "integer"}, "commission_pct": {"type": "null"}}}
+    },
+    {
+      "$comment": "R4. Комиссия процентом: процент обязателен",
+      "if": {"properties": {"commission_status": {"const": "процент"}}},
+      "then": {"properties": {"commission_pct": {"type": "number"}}}
+    },
+    {
+      "$comment": "R5. Нет комиссии или не указано: ни суммы, ни процента",
+      "if": {"properties": {"commission_status": {"enum": ["нет", "не указано"]}}},
+      "then": {"properties": {"commission_rub": {"type": "null"}, "commission_pct": {"type": "null"}}}
+    },
+    {
+      "$comment": "R6. Залог: сумма только при «сумма» и тогда обязательна",
+      "if": {"properties": {"deposit_status": {"const": "сумма"}}},
+      "then": {"properties": {"deposit_rub": {"type": "integer"}}},
+      "else": {"properties": {"deposit_rub": {"type": "null"}}}
+    },
+    {
+      "$comment": "R7. Объявление без месячной цены помечается флагом нет_цены (посуточное — нет: месячной цены у него и не бывает)",
+      "if": {"properties": {"is_offer": {"const": true}, "price_rub": {"type": "null"}, "deal": {"not": {"const": "daily"}}}},
+      "then": {"properties": {"red_flags": {"contains": {"const": "нет_цены"}}}}
+    },
+    {
+      "$comment": "R8. Цена есть — флага нет_цены нет",
+      "if": {"properties": {"price_rub": {"type": "integer"}}},
+      "then": {"properties": {"red_flags": {"not": {"contains": {"const": "нет_цены"}}}}}
+    },
+    {
+      "$comment": "R9. Известная цена — с цитатой",
+      "if": {"properties": {"price_rub": {"type": "integer"}}},
+      "then": {"properties": {"evidence": {"required": ["price_rub"]}}}
+    },
+    {
+      "$comment": "R10. Известный статус коммуналки — с цитатой",
+      "if": {"properties": {"utilities_status": {"not": {"const": "не указано"}}}},
+      "then": {"properties": {"evidence": {"required": ["utilities_status"]}}}
+    },
+    {
+      "$comment": "R11. Известный статус комиссии — с цитатой",
+      "if": {"properties": {"commission_status": {"not": {"const": "не указано"}}}},
+      "then": {"properties": {"evidence": {"required": ["commission_status"]}}}
+    },
+    {
+      "$comment": "R12. Известный статус залога — с цитатой",
+      "if": {"properties": {"deposit_status": {"not": {"const": "не указано"}}}},
+      "then": {"properties": {"evidence": {"required": ["deposit_status"]}}}
+    },
+    {
+      "$comment": "R13. Известный тип сделки — с цитатой",
+      "if": {"properties": {"deal": {"not": {"const": "unknown"}}}},
+      "then": {"properties": {"evidence": {"required": ["deal"]}}}
+    },
+    {
+      "$comment": "R14. Известная роль автора — с цитатой",
+      "if": {"properties": {"author_role": {"not": {"const": "неизвестно"}}}},
+      "then": {"properties": {"evidence": {"required": ["author_role"]}}}
+    }
+  ]
+}

@@ -1,0 +1,1108 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ассистент аренды СПб</title>
+<meta name="description" content="Полная цена аренды в Петербурге: сюрприз доплаты, драйверы интереса, надёжность данных, разбор объявлений и калькулятор юнит-экономики">
+<style>
+:root{
+  color-scheme: light;
+  --page:#f9f9f7; --surface:#fcfcfb; --raised:#f3f2ee; --ink:#0b0b0b; --ink2:#52514e; --muted:#898781;
+  --grid:#e1e0d9; --axis:#c3c2b7; --border:rgba(11,11,11,.10);
+  --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --s1-soft:#b7d3f6;
+  --g-top:#e4e3dc; --g-bot:#b1b0a8; --good:#006300; --bad:#c03030; --good-bg:#e6f3e6; --bad-bg:#fbe8e6;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+  color-scheme: dark;
+  --page:#0d0d0d; --surface:#1a1a19; --raised:#242422; --ink:#f0efec; --ink2:#c3c2b7; --muted:#898781;
+  --grid:#2c2c2a; --axis:#383835; --border:rgba(255,255,255,.10);
+  --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s1-soft:#104281;
+  --g-top:#33332f; --g-bot:#5e5d58; --good:#0ca30c; --bad:#e66767; --good-bg:#102b10; --bad-bg:#331414;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --page:#0d0d0d; --surface:#1a1a19; --raised:#242422; --ink:#f0efec; --ink2:#c3c2b7; --muted:#898781;
+  --grid:#2c2c2a; --axis:#383835; --border:rgba(255,255,255,.10);
+  --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s1-soft:#104281;
+  --g-top:#33332f; --g-bot:#5e5d58; --good:#0ca30c; --bad:#e66767; --good-bg:#102b10; --bad-bg:#331414;
+}
+
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--page);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+a{color:var(--s1)}
+.wrap{max-width:1120px;margin:0 auto;padding:0 16px}
+header.top{padding:28px 0 8px}
+.toprow{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+h1{font-size:28px;line-height:1.2;margin:0 0 8px;font-weight:650;letter-spacing:-.01em}
+.lead{margin:0 0 18px;color:var(--ink2);max-width:760px}
+.btn,.seg button{font:inherit;font-size:13px;color:var(--ink);background:var(--surface);border:1px solid var(--border);
+  border-radius:8px;padding:6px 10px;cursor:pointer;white-space:nowrap}
+.btn:hover,.seg button:hover{background:var(--raised)}
+.btn:focus-visible,.seg button:focus-visible,input:focus-visible,summary:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--s1);outline-offset:2px}
+.seg{display:inline-flex;flex-wrap:wrap;gap:6px}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin:0 0 18px}
+.chapter-head{padding:44px 0 18px}
+.chapter-head .kicker{font-size:13px;color:var(--ink2);text-transform:uppercase;letter-spacing:.06em;margin:0 0 6px}
+.chapter-head h2{font-size:26px;line-height:1.25;margin:0 0 10px;font-weight:650}
+.chapter-head p{color:var(--ink2);max-width:760px;margin:0}
+.chapter-nav{display:flex;flex-direction:column;align-items:center;gap:6px;margin:4px 0 40px;text-align:center}
+.chapter-nav a{font:inherit;font-size:16px;font-weight:650;color:#fff;background:var(--s3);border:1px solid var(--s3);
+  border-radius:999px;padding:13px 26px;text-decoration:none;box-shadow:0 3px 14px rgba(27,175,122,.3);transition:transform .15s,filter .15s}
+.chapter-nav a:hover{filter:brightness(1.08);transform:translateY(-1px)}
+.chapter-nav a:active{transform:translateY(0)}
+.chapter-nav .teaser{font-size:12px;color:var(--ink2)}
+.chapter-nav a.secondary{color:var(--ink);background:var(--surface);border-color:var(--border);box-shadow:none;font-weight:600;font-size:14px}
+.chapter-nav a.secondary:hover{background:var(--raised)}
+.hero-story{border-left:3px solid var(--s3);background:var(--raised);padding:14px 16px;border-radius:0 8px 8px 0;margin:12px 0 0;font-size:14px}
+.time-note{margin:18px 0 0;padding:14px 16px;border:1px dashed var(--border);border-radius:10px;font-size:14px;color:var(--ink2)}
+.scroll-rows{max-height:440px;overflow-y:auto;border:1px solid var(--border);border-radius:10px}
+.be-badge{display:flex;flex-wrap:wrap;gap:4px 20px;align-items:baseline;padding:14px 18px;border-radius:12px;margin:0 0 16px;font-size:14px;border:1px solid var(--border)}
+.be-badge.good{background:var(--good-bg)}
+.be-badge.bad{background:var(--bad-bg)}
+.be-badge b{font-size:18px;font-variant-numeric:tabular-nums}
+.be-badge.good b{color:var(--good)}
+.be-badge.bad b{color:var(--bad)}
+table.bd{border-collapse:collapse;width:100%;font-size:13px;margin-top:4px}
+table.bd td,table.bd th{padding:6px 8px;border-bottom:1px solid var(--grid);text-align:left}
+table.bd td.n,table.bd th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+table.bd tr.grp td{font-weight:600;padding-top:14px;border-bottom:1px solid var(--axis)}
+table.bd tr.sub td:first-child{padding-left:22px;color:var(--ink2)}
+table.bd tr.total td{font-weight:650;border-top:2px solid var(--axis);border-bottom:0}
+.tile{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px}
+.tile .lab{font-size:13px;color:var(--ink2);line-height:1.3}
+.tile .val{font-size:30px;font-weight:650;line-height:1.15;margin:6px 0 4px}
+.tile .sub{font-size:12px;color:var(--ink2);line-height:1.35}
+section.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px 22px;margin:0 0 20px}
+section.card h2{font-size:20px;line-height:1.25;margin:0 0 6px;font-weight:650}
+.sub2{color:var(--ink2);margin:0 0 14px;max-width:820px}
+.note{font-size:13px;color:var(--ink2);margin:10px 0 0;max-width:860px}
+.callout{border-left:3px solid var(--s1);background:var(--raised);padding:10px 14px;border-radius:0 8px 8px 0;margin:14px 0 0;font-size:14px}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;margin:0 0 8px;font-size:13px;color:var(--ink2)}
+.legend span.it{display:inline-flex;align-items:center;gap:6px}
+.legend svg{flex:none}
+.chart{width:100%;position:relative}
+.chart svg{display:block;width:100%;overflow:visible}
+svg text{font-family:inherit}
+.ax{fill:var(--muted);font-size:11px;font-variant-numeric:tabular-nums}
+.axl{fill:var(--ink2);font-size:12px}
+.gl{stroke:var(--grid);stroke-width:1}
+.bl{stroke:var(--axis);stroke-width:1}
+.lab{fill:var(--ink);font-size:13px}
+.lab2{fill:var(--ink2);font-size:12px}
+.valt{fill:var(--ink);font-size:13px;font-weight:600;font-variant-numeric:tabular-nums}
+.f1{fill:var(--s1)}.f2{fill:var(--s2)}.f3{fill:var(--s3)}.fsoft{fill:var(--s1-soft)}.fgt{fill:var(--g-top)}.fgb{fill:var(--g-bot)}
+.st1{stroke:var(--s1)}.st2{stroke:var(--s2)}.st3{stroke:var(--s3)}
+.ring{stroke:var(--surface);stroke-width:2}
+.hot{opacity:.78}
+.row-hit{fill:transparent;cursor:default}
+details.tv{margin-top:12px;font-size:13px}
+details.tv summary{cursor:pointer;color:var(--ink2)}
+table.t{border-collapse:collapse;width:100%;font-size:13px;margin-top:8px}
+table.t th,table.t td{padding:6px 8px;border-bottom:1px solid var(--grid);text-align:left;vertical-align:top}
+table.t td.n,table.t th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+table.t code{font-size:12px;word-break:break-word}
+.tscroll{max-width:100%;overflow-x:auto}
+/* разбор полей */
+.ext{display:grid;grid-template-columns:minmax(150px,1.3fr) repeat(3,minmax(0,1fr));gap:0;font-size:13px}
+.ext>div{padding:8px 8px;border-bottom:1px solid var(--grid)}
+.ext .h{color:var(--ink2);font-weight:600;font-size:12px}
+.ext .f{font-weight:600;color:var(--ink)}
+.meter{height:8px;border-radius:4px;background:var(--raised);overflow:hidden;margin:4px 0 2px}
+.meter>span{display:block;height:100%;border-radius:4px}
+.mv{font-variant-numeric:tabular-nums;font-weight:600}
+.ms{color:var(--ink2);font-size:12px}
+.wait{color:var(--ink2);font-style:italic}
+/* калькулятор */
+.calc-bar{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;margin:0 0 14px}
+.calc-bar .lbl{font-size:13px;color:var(--ink2);margin-right:4px}
+.otiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin:0 0 18px}
+.otiles .tile{padding:12px 14px}
+.otiles .val{font-size:24px}
+.otiles .val.txt{font-size:18px;line-height:1.25;padding-top:4px}
+.calc-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:22px;align-items:start}
+.calc-side{position:sticky;top:12px}
+details.grp{border:1px solid var(--border);border-radius:10px;margin:0 0 10px;background:var(--surface)}
+details.grp>summary{cursor:pointer;padding:10px 14px;font-weight:600;font-size:14px;list-style-position:inside}
+.grp-body{padding:2px 14px 12px}
+.prm{padding:8px 0;border-top:1px solid var(--grid)}
+.prm:first-child{border-top:0}
+.prm-top{display:flex;flex-wrap:wrap;justify-content:space-between;gap:2px 10px;align-items:baseline}
+.prm-top label{font-size:13px;line-height:1.3;flex:1 1 190px}
+.prm-top output{font-size:13px;font-weight:600;white-space:nowrap;font-variant-numeric:tabular-nums;margin-left:auto}
+.prm-top output small{font-weight:400;color:var(--ink2);margin-left:4px}
+.prm input[type=range]{width:100%;margin:6px 0 0;accent-color:var(--s1)}
+.info{border:0;background:none;color:var(--ink2);cursor:pointer;font-size:12px;padding:0 0 0 4px}
+.prm-src{font-size:12px;color:var(--ink2);margin-top:4px}
+.num-in{display:flex;gap:10px;flex-wrap:wrap;margin:8px 0}
+.num-in label{font-size:13px;display:flex;flex-direction:column;gap:3px}
+.num-in input{font:inherit;font-size:14px;width:130px;padding:5px 8px;border:1px solid var(--axis);border-radius:6px;background:var(--page);color:var(--ink)}
+.derived{font-size:12px;color:var(--ink2);margin-top:6px}
+#model-bar .num-in{margin:0}
+#model-bar .num-in input{width:110px}
+.need{margin:16px 0 0;padding:14px 16px;border:1px solid var(--border);border-radius:10px;background:var(--raised)}
+.need h3{font-size:15px;margin:0 0 8px}
+.need ol{margin:0;padding-left:20px}
+.need li{margin:4px 0;font-size:14px}
+.need .na{color:var(--ink2)}
+.sticky-sum{position:sticky;bottom:0;z-index:5;margin:16px -22px -20px;padding:10px 22px;background:var(--surface);
+  border-top:1px solid var(--border);border-radius:0 0 14px 14px;font-size:14px;display:flex;flex-wrap:wrap;gap:4px 18px}
+.sticky-sum b{font-variant-numeric:tabular-nums}
+h3.ch{font-size:15px;margin:18px 0 4px}
+.ch-sub{font-size:13px;color:var(--ink2);margin:0 0 8px}
+/* подсказка */
+#tip{position:fixed;z-index:50;pointer-events:none;background:var(--surface);color:var(--ink);border:1px solid var(--border);
+  box-shadow:0 4px 18px rgba(0,0,0,.14);border-radius:8px;padding:8px 10px;font-size:13px;max-width:280px;line-height:1.35}
+#tip .tt-title{color:var(--ink2);font-size:12px;margin-bottom:4px}
+#tip .tt-row{display:flex;align-items:center;gap:6px;margin:2px 0}
+#tip .tt-key{width:12px;height:2px;border-radius:1px;flex:none}
+#tip strong{font-variant-numeric:tabular-nums}
+#tip .tt-lab{color:var(--ink2)}
+footer{padding:8px 0 40px;color:var(--ink2);font-size:13px}
+footer p{margin:6px 0}
+@media (max-width:900px){
+  .calc-grid{grid-template-columns:1fr}
+  .calc-side{position:static}
+}
+@media (max-width:600px){
+  h1{font-size:23px}
+  section.card{padding:16px 16px;border-radius:12px}
+  .sticky-sum{margin:16px -16px -16px;padding:10px 16px}
+  .tile .val{font-size:24px}
+  .otiles .val{font-size:20px}
+  .otiles .val.txt{font-size:16px}
+  .sticky-sum{font-size:13px;gap:2px 12px}
+  .ext{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .ext .h{display:none}
+  .ext .f{grid-column:1/-1;border-bottom:0;padding-bottom:0;padding-top:14px}
+  .ext>div[data-l]::before{content:attr(data-l);display:block;font-size:11px;color:var(--ink2)}
+  .ext .cl{grid-column:1/-1}
+}
+@media (forced-colors: active){ .meter>span{background:CanvasText!important} }
+
+</style>
+</head>
+<body data-built="2026-11-10">
+
+<header class="top wrap">
+  <div class="toprow">
+    <div>
+      <h1>Ассистент аренды в Петербурге</h1>
+      <p class="lead">Бот читает объявления Telegram и Циана, считает полную цену в месяц (аренда + коммуналка +
+        комиссия) и поднимает выше квартиры рядом с местами, важными человеку: метро, зал, садик, каток.</p>
+    </div>
+    <button class="btn" id="theme-btn" type="button" aria-label="Переключить тему">Тема: авто</button>
+  </div>
+</header>
+
+<main class="wrap">
+  <section id="chapter-1">
+    <div class="kpis" id="kpis"></div>
+    <div class="hero-story" id="hero-story"></div>
+    <p class="time-note" id="time-note"></p>
+    <nav class="chapter-nav">
+      <a href="#chapter-2">Дальше: сколько вы на самом деле переплатите →</a>
+      <p class="teaser">Покажем квартиры с самой большой доплатой и места, которые объявление скрывает</p>
+    </nav>
+  </section>
+
+  <section class="chapter-head" id="chapter-2">
+    <p class="kicker">Глава 2</p>
+    <h2>Сюрприз доплаты и что город прячет рядом с домом</h2>
+    <p>Как на самом деле устроена цена аренды и какие места рядом с квартирой объявление никогда не упомянет.</p>
+  </section>
+
+  <section class="card" id="s-surprise">
+    <h2>Сюрприз доплаты</h2>
+    <p class="sub2" id="scatter-sub"></p>
+    <div class="legend" id="scatter-legend"></div>
+    <div class="scroll-rows"><div class="chart" id="scatter-chart" role="img"></div></div>
+    <p class="note">Циан, долгая аренда, студии и 1-к в одном районе. У каждой квартиры — цена из объявления (левая
+      точка) и полная цена в месяц (правая точка): аренда + коммуналка + комиссия / 11 месяцев. Где коммуналка не
+      указана, она оценена медианой указанных сумм по формату, тонкий отрезок — разброс оценки p25–p75.</p>
+    <div class="callout" id="top10-callout"></div>
+    <details class="tv"><summary>Таблица к графику (сводка)</summary><div class="tscroll" id="scatter-table"></div></details>
+    <details class="tv"><summary>Все объявления по доплате</summary><div class="tscroll" id="scatter-table-full"></div></details>
+  </section>
+
+  <section class="card" id="s-drivers">
+    <h2>Что делают драйверы интереса</h2>
+    <p class="sub2" id="drv-sub"></p>
+    <div class="calc-bar"><span class="lbl">Каток:</span>
+      <div class="seg" id="ice-seg" role="group" aria-label="Какие катки учитывать">
+        <button type="button" data-v="all" aria-pressed="true">все объекты</button>
+        <button type="button" data-v="named" aria-pressed="false">только с названием</button>
+      </div>
+    </div>
+    <div class="chart" id="drv-chart" role="img"></div>
+    <p class="note">Баллы — по формуле поиска (раздел 5.1 отчёта): близость 0 при ≥ 20 мин пешком, максимум — при
+      ≤ 5 мин; место, выбранное единственным после метро, весит 0,5 (= 50 баллов из 100). Левая точка — 0 (в
+      объявлении это место никак не названо), правая — медиана баллов среди квартир, которые и правда рядом.
+      Минуты — пешком по OpenStreetMap, только у объявлений с точкой на доме.</p>
+    <details class="tv"><summary>Таблица к графику</summary><div class="tscroll" id="drv-table"></div></details>
+  </section>
+
+  
+  <nav class="chapter-nav">
+    <a href="#chapter-3">Дальше: сойдётся ли тут экономика →</a>
+    <p class="teaser">Покажем, где ИИ справляется сам, а где нет, и честный расчёт прибыли</p>
+  </nav>
+
+  <section class="chapter-head" id="chapter-3">
+    <p class="kicker">Глава 3</p>
+    <h2>Как ИИ читает объявления и сходится ли экономика</h2>
+    <p>Что из текста объявления достаёт правило, а что — языковая модель, и выдерживает ли всё это юнит-экономику.</p>
+  </section>
+
+  <section class="card" id="s-extract">
+    <h2>Разбор объявлений: правила против LLM</h2>
+    <p class="sub2" id="ext-sub"></p>
+    <div class="legend" id="ext-legend"></div>
+    <div class="ext" id="ext"></div>
+    <p class="note" id="ext-note"></p>
+  </section>
+
+  <section class="card" id="calc">
+    <h2>Калькулятор юнит-экономики</h2>
+    <p class="sub2">Все формулы — из модели проекта (econ_model.json), считаются прямо в браузере. Двигайте
+      ползунки: плашка, таблица и подбор «чтобы окупиться» пересчитываются сразу. Один платящий — один поиск
+      квартиры. Сценарий меняет рынок, а модель и курс оставляет как выбраны.</p>
+    <div class="be-badge" id="be-badge"></div>
+    <div class="calc-bar">
+      <span class="lbl">Сценарий:</span>
+      <div class="seg" id="scn-seg" role="group" aria-label="Сценарий"></div>
+      <button type="button" class="btn" id="reset-btn">Сброс</button>
+    </div>
+    <div class="calc-bar" id="model-bar"><span class="lbl">Модель:</span></div>
+    <div class="otiles" id="otiles"></div>
+    <div class="calc-grid">
+      <div id="params"></div>
+      <div class="calc-side">
+        <h3 class="ch" style="margin-top:0">Доходы и расходы в месяц</h3>
+        <p class="ch-sub" id="curve-sub"></p>
+        <div class="tscroll"><table class="bd" id="bd-table"></table></div>
+        <div class="need" id="need"></div>
+      </div>
+    </div>
+    <details class="tv"><summary>Фиксированные допущения (без ползунков)</summary><div class="tscroll" id="fixed-table"></div></details>
+    <details class="tv"><summary>Все формулы модели и текущие значения</summary><div class="tscroll" id="formula-table"></div></details>
+    <div class="sticky-sum" id="sticky-sum" aria-live="polite"></div>
+  </section>
+
+  <nav class="chapter-nav"><a href="#chapter-1" class="secondary">↑ Сначала</a></nav>
+</main>
+
+<footer class="wrap">
+  <p><b>Источники.</b> Геоданные и минуты пешком — © участники OpenStreetMap, лицензия ODbL. Объявления Циана
+    и публичного Telegram-канала об аренде собраны автором для учебного проекта и обезличены: на странице только
+    агрегаты, без адресов и контактов. Цены моделей — каталог OpenRouter.</p>
+  <p id="foot-dates"></p>
+  <p>Дарья Подакова · <a href="https://github.com/DaryaPodakova/rent_automatization">https://github.com/DaryaPodakova/rent_automatization</a></p>
+</footer>
+
+<script type="application/json" id="dash-data">{"generated":"2026-11-10","source_note":"Итоговый проект «Квалифицированный заказчик»: агрегаты чистого набора (Telegram-канал по городу + Циан в одном районе, только долгая аренда квартир); минуты — OSM, точка по дому","waterfall":[{"step":"все объявления","left":715,"prev":715,"pct_all":100.0,"drop_pct":0.0,"pct_of_metro":null},{"step":"есть координаты","left":627,"prev":715,"pct_all":87.7,"drop_pct":12.3,"pct_of_metro":null},{"step":"точка по дому (geo_precise)","left":496,"prev":627,"pct_all":69.4,"drop_pct":20.9,"pct_of_metro":null},{"step":"≤ 15 мин до метро","left":284,"prev":496,"pct_all":39.7,"drop_pct":42.7,"pct_of_metro":100.0},{"step":"+ фитнес-клуб ≤ 15 мин","left":271,"prev":284,"pct_all":37.9,"drop_pct":4.6,"pct_of_metro":95.4},{"step":"+ детский сад и поликлиника ≤ 15 мин","left":248,"prev":271,"pct_all":34.7,"drop_pct":8.5,"pct_of_metro":87.3},{"step":"+ каток ≤ 15 мин (все объекты ice)","left":47,"prev":248,"pct_all":6.6,"drop_pct":81.0,"pct_of_metro":16.5},{"step":"+ каток ≤ 15 мин (только с названием)","left":29,"prev":248,"pct_all":4.1,"drop_pct":88.3,"pct_of_metro":10.2}],"reliability":{"n":{"Telegram":575,"Циан":140},"util_status_pct":{"Telegram":{"включена":1.9,"не указано":80.0,"сумма":7.7,"счётчики сверху":10.4},"Циан":{"включена":15.7,"не указано":9.3,"сумма":68.6,"счётчики сверху":6.4}},"cost_basis_pct":{"Telegram":{"известно":9.6,"оценка коммуналки":80.0,"оценка: счётчики":10.4},"Циан":{"известно":84.3,"оценка коммуналки":9.3,"оценка: счётчики":6.4}},"geo_pct":{"Telegram":{"дом":61.9,"нет":15.3,"улица":22.8},"Циан":{"дом":100.0,"нет":0.0,"улица":0.0}},"util_sum_in_text_pct":{"Telegram":7.7,"Циан":68.6},"commission_known_pct":{"Telegram":0.0,"Циан":100.0},"note":"доля строк чистого набора (долгая аренда квартир), %; «сумма» у Telegram — сумма КУ найдена в тексте поста"},"price_vs_full":{"n":140,"points":[{"id":2,"fmt":"студия","area":14.0,"price":26000,"est":26000,"lo":26000,"hi":26000,"basis":"известно","metro":"станция B","metro_min":14.0,"floor":1,"floors":7,"util_status":"включена","commission":0},{"id":4,"fmt":"студия","area":17.0,"price":24990,"est":31126,"lo":30126,"hi":32126,"basis":"оценка: счётчики","metro":"станция D","metro_min":9.0,"floor":1,"floors":5,"util_status":"счётчики сверху","commission":12495},{"id":6,"fmt":"студия","area":20.0,"price":26000,"est":27182,"lo":27182,"hi":27182,"basis":"известно","metro":"станция B","metro_min":14.0,"floor":1,"floors":5,"util_status":"включена","commission":13000},{"id":12,"fmt":"1-к","area":25.0,"price":30000,"est":30000,"lo":30000,"hi":30000,"basis":"известно","metro":null,"metro_min":6.0,"floor":4,"floors":12,"util_status":"включена","commission":0},{"id":15,"fmt":"студия","area":13.0,"price":30000,"est":30000,"lo":30000,"hi":30000,"basis":"известно","metro":null,"metro_min":6.0,"floor":1,"floors":5,"util_status":"включена","commission":0},{"id":22,"fmt":"студия","area":12.0,"price":29999,"est":32499,"lo":32499,"hi":32499,"basis":"известно","metro":"станция D","metro_min":9.0,"floor":1,"floors":6,"util_status":"сумма","commission":0},{"id":24,"fmt":"студия","area":20.0,"price":28000,"est":32773,"lo":32773,"hi":32773,"basis":"известно","metro":"станция D","metro_min":7.0,"floor":1,"floors":8,"util_status":"сумма","commission":14000},{"id":32,"fmt":"студия","area":15.0,"price":32000,"est":33455,"lo":33455,"hi":33455,"basis":"известно","metro":null,"metro_min":13.0,"floor":1,"floors":5,"util_status":"включена","commission":16000},{"id":34,"fmt":"студия","area":10.0,"price":34000,"est":39000,"lo":38000,"hi":40000,"basis":"оценка: счётчики","metro":"станция A","metro_min":8.0,"floor":3,"floors":5,"util_status":"счётчики сверху","commission":0},{"id":36,"fmt":"студия","area":11.4,"price":30000,"est":34364,"lo":34364,"hi":34364,"basis":"известно","metro":"станция L","metro_min":12.0,"floor":2,"floors":6,"util_status":"сумма","commission":15000},{"id":37,"fmt":"студия","area":24.0,"price":33000,"est":34500,"lo":34500,"hi":34500,"basis":"известно","metro":null,"metro_min":4.0,"floor":2,"floors":3,"util_status":"включена","commission":16500},{"id":38,"fmt":"1-к","area":16.0,"price":35000,"est":35000,"lo":35000,"hi":35000,"basis":"известно","metro":"станция M","metro_min":6.0,"floor":15,"floors":15,"util_status":"включена","commission":0},{"id":39,"fmt":"студия","area":16.0,"price":29000,"est":35000,"lo":35000,"hi":35000,"basis":"известно","metro":"станция N","metro_min":17.0,"floor":1,"floors":3,"util_status":"сумма","commission":0},{"id":42,"fmt":"студия","area":17.0,"price":30000,"est":35864,"lo":35864,"hi":35864,"basis":"известно","metro":"станция O","metro_min":10.0,"floor":1,"floors":5,"util_status":"сумма","commission":15000},{"id":44,"fmt":"студия","area":20.0,"price":35000,"est":36591,"lo":36591,"hi":36591,"basis":"известно","metro":"станция P","metro_min":9.0,"floor":1,"floors":4,"util_status":"включена","commission":17500},{"id":45,"fmt":"студия","area":17.0,"price":30000,"est":36909,"lo":36909,"hi":36909,"basis":"известно","metro":"станция A","metro_min":10.0,"floor":2,"floors":4,"util_status":"сумма","commission":21000},{"id":49,"fmt":"студия","area":13.0,"price":31000,"est":37255,"lo":37255,"hi":37255,"basis":"известно","metro":"станция A","metro_min":7.0,"floor":1,"floors":4,"util_status":"сумма","commission":24800},{"id":51,"fmt":"1-к","area":19.0,"price":33000,"est":38000,"lo":38000,"hi":38000,"basis":"известно","metro":"станция Q","metro_min":1.0,"floor":4,"floors":6,"util_status":"сумма","commission":0},{"id":52,"fmt":"студия","area":14.0,"price":35000,"est":38000,"lo":38000,"hi":38000,"basis":"известно","metro":"станция F","metro_min":4.0,"floor":1,"floors":8,"util_status":"сумма","commission":0},{"id":53,"fmt":"студия","area":14.0,"price":32500,"est":38000,"lo":38000,"hi":38000,"basis":"известно","metro":"станция B","metro_min":4.0,"floor":1,"floors":5,"util_status":"сумма","commission":0},{"id":54,"fmt":"1-к","area":26.0,"price":35000,"est":38500,"lo":38500,"hi":38500,"basis":"известно","metro":"станция A","metro_min":6.0,"floor":2,"floors":6,"util_status":"сумма","commission":0},{"id":55,"fmt":"1-к","area":30.8,"price":32000,"est":38455,"lo":38455,"hi":38455,"basis":"известно","metro":"станция M","metro_min":16.0,"floor":2,"floors":5,"util_status":"сумма","commission":16000},{"id":61,"fmt":"1-к","area":27.0,"price":38000,"est":39000,"lo":39000,"hi":39000,"basis":"известно","metro":"станция O","metro_min":3.0,"floor":1,"floors":5,"util_status":"сумма","commission":0},{"id":62,"fmt":"1-к","area":35.0,"price":32000,"est":39455,"lo":39455,"hi":39455,"basis":"известно","metro":"станция R","metro_min":14.0,"floor":4,"floors":5,"util_status":"сумма","commission":16000},{"id":63,"fmt":"студия","area":21.0,"price":38000,"est":44727,"lo":43727,"hi":45727,"basis":"оценка: счётчики","metro":"станция S","metro_min":6.0,"floor":2,"floors":4,"util_status":"счётчики сверху","commission":19000},{"id":66,"fmt":"студия","area":17.0,"price":40000,"est":45000,"lo":44000,"hi":46000,"basis":"оценка коммуналки","metro":"станция S","metro_min":5.0,"floor":2,"floors":7,"util_status":"не указано","commission":0},{"id":71,"fmt":"1-к","area":34.0,"price":36000,"est":40000,"lo":40000,"hi":40000,"basis":"известно","metro":"станция N","metro_min":15.0,"floor":4,"floors":4,"util_status":"сумма","commission":0},{"id":74,"fmt":"студия","area":18.0,"price":40000,"est":46455,"lo":45455,"hi":47455,"basis":"оценка коммуналки","metro":"станция S","metro_min":10.0,"floor":4,"floors":5,"util_status":"не указано","commission":16000},{"id":76,"fmt":"1-к","area":18.0,"price":35000,"est":41591,"lo":41591,"hi":41591,"basis":"известно","metro":"станция H","metro_min":3.0,"floor":3,"floors":6,"util_status":"сумма","commission":17500},{"id":78,"fmt":"1-к","area":40.0,"price":40000,"est":41818,"lo":41818,"hi":41818,"basis":"известно","metro":null,"metro_min":11.0,"floor":2,"floors":5,"util_status":"включена","commission":20000},{"id":80,"fmt":"студия","area":26.0,"price":42000,"est":47000,"lo":46000,"hi":48000,"basis":"оценка коммуналки","metro":"станция A","metro_min":9.0,"floor":1,"floors":4,"util_status":"не указано","commission":0},{"id":82,"fmt":"студия","area":25.0,"price":42000,"est":42000,"lo":42000,"hi":42000,"basis":"известно","metro":null,"metro_min":6.0,"floor":7,"floors":18,"util_status":"включена","commission":0},{"id":83,"fmt":"студия","area":21.0,"price":40000,"est":42500,"lo":42500,"hi":42500,"basis":"известно","metro":"станция D","metro_min":6.0,"floor":1,"floors":4,"util_status":"сумма","commission":0},{"id":84,"fmt":"студия","area":17.0,"price":38000,"est":43000,"lo":43000,"hi":43000,"basis":"известно","metro":"станция F","metro_min":2.0,"floor":2,"floors":5,"util_status":"сумма","commission":0},{"id":85,"fmt":"студия","area":18.0,"price":38000,"est":43000,"lo":43000,"hi":43000,"basis":"известно","metro":"станция G","metro_min":2.0,"floor":2,"floors":8,"util_status":"сумма","commission":0},{"id":86,"fmt":"студия","area":26.0,"price":36000,"est":42964,"lo":42964,"hi":42964,"basis":"известно","metro":"станция M","metro_min":6.0,"floor":18,"floors":18,"util_status":"сумма","commission":21600},{"id":90,"fmt":"студия","area":30.0,"price":40000,"est":43000,"lo":43000,"hi":43000,"basis":"известно","metro":"станция C","metro_min":5.0,"floor":3,"floors":4,"util_status":"сумма","commission":0},{"id":96,"fmt":"студия","area":30.0,"price":37000,"est":44018,"lo":44018,"hi":44018,"basis":"известно","metro":"станция S","metro_min":4.0,"floor":3,"floors":8,"util_status":"сумма","commission":22200},{"id":97,"fmt":"студия","area":30.0,"price":35000,"est":44500,"lo":44500,"hi":44500,"basis":"известно","metro":"станция M","metro_min":6.0,"floor":17,"floors":18,"util_status":"сумма","commission":0},{"id":98,"fmt":"студия","area":24.0,"price":35000,"est":44591,"lo":44591,"hi":44591,"basis":"известно","metro":"станция M","metro_min":6.0,"floor":11,"floors":18,"util_status":"сумма","commission":17500},{"id":99,"fmt":"1-к","area":44.9,"price":38000,"est":44727,"lo":44727,"hi":44727,"basis":"известно","metro":"станция N","metro_min":16.0,"floor":2,"floors":5,"util_status":"сумма","commission":19000},{"id":102,"fmt":"студия","area":29.0,"price":40000,"est":45000,"lo":45000,"hi":45000,"basis":"известно","metro":"станция S","metro_min":5.0,"floor":4,"floors":7,"util_status":"сумма","commission":0},{"id":103,"fmt":"студия","area":23.0,"price":35000,"est":45000,"lo":45000,"hi":45000,"basis":"известно","metro":"станция M","metro_min":6.0,"floor":6,"floors":18,"util_status":"сумма","commission":0},{"id":104,"fmt":"1-к","area":36.0,"price":45000,"est":50000,"lo":49000,"hi":51750,"basis":"оценка коммуналки","metro":"станция R","metro_min":11.0,"floor":6,"floors":10,"util_status":"не указано","commission":0},{"id":109,"fmt":"студия","area":25.0,"price":40000,"est":45000,"lo":45000,"hi":45000,"basis":"известно","metro":"станция E","metro_min":9.0,"floor":3,"floors":7,"util_status":"сумма","commission":0},{"id":110,"fmt":"студия","area":18.0,"price":45000,"est":45000,"lo":45000,"hi":45000,"basis":"известно","metro":"станция S","metro_min":2.0,"floor":5,"floors":6,"util_status":"включена","commission":0},{"id":111,"fmt":"студия","area":24.0,"price":40000,"est":45000,"lo":45000,"hi":45000,"basis":"известно","metro":"станция I","metro_min":6.0,"floor":4,"floors":4,"util_status":"сумма","commission":0},{"id":112,"fmt":"студия","area":23.0,"price":40000,"est":45364,"lo":45364,"hi":45364,"basis":"известно","metro":"станция O","metro_min":6.0,"floor":4,"floors":6,"util_status":"сумма","commission":4000},{"id":115,"fmt":"студия","area":15.0,"price":40000,"est":45909,"lo":45909,"hi":45909,"basis":"известно","metro":"станция J","metro_min":10.0,"floor":2,"floors":7,"util_status":"сумма","commission":32000},{"id":116,"fmt":"студия","area":28.0,"price":38000,"est":46000,"lo":46000,"hi":46000,"basis":"известно","metro":"станция M","metro_min":6.0,"floor":14,"floors":19,"util_status":"сумма","commission":0},{"id":117,"fmt":"студия","area":20.0,"price":40000,"est":45955,"lo":45955,"hi":45955,"basis":"известно","metro":"станция S","metro_min":4.0,"floor":4,"floors":8,"util_status":"сумма","commission":16000},{"id":118,"fmt":"1-к","area":30.0,"price":40000,"est":46000,"lo":46000,"hi":46000,"basis":"известно","metro":"станция H","metro_min":4.0,"floor":5,"floors":5,"util_status":"сумма","commission":0},{"id":119,"fmt":"студия","area":30.0,"price":46000,"est":46000,"lo":46000,"hi":46000,"basis":"известно","metro":"станция S","metro_min":3.0,"floor":4,"floors":5,"util_status":"включена","commission":0},{"id":120,"fmt":"студия","area":25.0,"price":40000,"est":46000,"lo":46000,"hi":46000,"basis":"известно","metro":"станция O","metro_min":4.0,"floor":1,"floors":5,"util_status":"сумма","commission":0},{"id":124,"fmt":"студия","area":20.4,"price":39999,"est":46817,"lo":46817,"hi":46817,"basis":"известно","metro":"станция O","metro_min":4.0,"floor":2,"floors":7,"util_status":"сумма","commission":20000},{"id":125,"fmt":"студия","area":17.0,"price":40000,"est":46818,"lo":46818,"hi":46818,"basis":"известно","metro":"станция S","metro_min":7.0,"floor":1,"floors":5,"util_status":"сумма","commission":20000},{"id":127,"fmt":"студия","area":18.5,"price":40000,"est":46909,"lo":46909,"hi":46909,"basis":"известно","metro":"станция E","metro_min":8.0,"floor":3,"floors":4,"util_status":"сумма","commission":10000},{"id":132,"fmt":"студия","area":16.0,"price":45000,"est":47045,"lo":47045,"hi":47045,"basis":"известно","metro":"станция S","metro_min":10.0,"floor":4,"floors":5,"util_status":"включена","commission":22500},{"id":134,"fmt":"студия","area":32.0,"price":37000,"est":47364,"lo":47364,"hi":47364,"basis":"известно","metro":"станция E","metro_min":7.0,"floor":2,"floors":4,"util_status":"сумма","commission":37000},{"id":136,"fmt":"1-к","area":25.0,"price":40000,"est":47636,"lo":47636,"hi":47636,"basis":"известно","metro":"станция I","metro_min":12.0,"floor":3,"floors":6,"util_status":"сумма","commission":40000},{"id":137,"fmt":"1-к","area":34.0,"price":40000,"est":47636,"lo":47636,"hi":47636,"basis":"известно","metro":"станция D","metro_min":8.0,"floor":2,"floors":5,"util_status":"сумма","commission":40000},{"id":138,"fmt":"студия","area":28.0,"price":40000,"est":48000,"lo":48000,"hi":48000,"basis":"известно","metro":"станция M","metro_min":6.0,"floor":11,"floors":22,"util_status":"сумма","commission":0},{"id":142,"fmt":"1-к","area":25.0,"price":38000,"est":48000,"lo":48000,"hi":48000,"basis":"известно","metro":"станция M","metro_min":6.0,"floor":10,"floors":18,"util_status":"сумма","commission":0},{"id":145,"fmt":"студия","area":18.5,"price":49000,"est":49000,"lo":49000,"hi":49000,"basis":"известно","metro":"станция A","metro_min":9.0,"floor":3,"floors":6,"util_status":"включена","commission":0},{"id":148,"fmt":"студия","area":15.0,"price":45000,"est":49091,"lo":49091,"hi":49091,"basis":"известно","metro":"станция J","metro_min":9.0,"floor":4,"floors":5,"util_status":"включена","commission":45000},{"id":149,"fmt":"студия","area":22.0,"price":40000,"est":49318,"lo":49318,"hi":49318,"basis":"известно","metro":"станция E","metro_min":10.0,"floor":4,"floors":10,"util_status":"сумма","commission":20000},{"id":150,"fmt":"студия","area":34.4,"price":50000,"est":55000,"lo":54000,"hi":56000,"basis":"оценка коммуналки","metro":"станция E","metro_min":10.0,"floor":3,"floors":10,"util_status":"не указано","commission":0},{"id":161,"fmt":"1-к","area":32.0,"price":50000,"est":50000,"lo":50000,"hi":50000,"basis":"известно","metro":null,"metro_min":8.0,"floor":2,"floors":6,"util_status":"включена","commission":0},{"id":163,"fmt":"студия","area":24.0,"price":45000,"est":50045,"lo":50045,"hi":50045,"basis":"известно","metro":"станция B","metro_min":2.0,"floor":4,"floors":5,"util_status":"сумма","commission":22500},{"id":168,"fmt":"студия","area":20.0,"price":40000,"est":50227,"lo":50227,"hi":50227,"basis":"известно","metro":"станция E","metro_min":10.0,"floor":3,"floors":10,"util_status":"сумма","commission":30000},{"id":169,"fmt":"студия","area":24.5,"price":38000,"est":50455,"lo":50455,"hi":50455,"basis":"известно","metro":"станция M","metro_min":6.0,"floor":6,"floors":18,"util_status":"сумма","commission":38000},{"id":171,"fmt":"1-к","area":25.0,"price":45000,"est":50818,"lo":50818,"hi":50818,"basis":"известно","metro":"станция D","metro_min":8.0,"floor":3,"floors":5,"util_status":"сумма","commission":9000},{"id":174,"fmt":"студия","area":17.0,"price":51000,"est":51000,"lo":51000,"hi":51000,"basis":"известно","metro":"станция G","metro_min":2.0,"floor":2,"floors":5,"util_status":"включена","commission":0},{"id":176,"fmt":"студия","area":24.1,"price":43000,"est":51469,"lo":51469,"hi":51469,"basis":"известно","metro":"станция M","metro_min":6.0,"floor":4,"floors":18,"util_status":"сумма","commission":5160},{"id":179,"fmt":"студия","area":26.2,"price":52000,"est":57000,"lo":56000,"hi":58000,"basis":"оценка коммуналки","metro":"станция A","metro_min":9.0,"floor":2,"floors":4,"util_status":"не указано","commission":0},{"id":181,"fmt":"1-к","area":32.0,"price":42000,"est":52000,"lo":52000,"hi":52000,"basis":"известно","metro":"станция M","metro_min":6.0,"floor":5,"floors":13,"util_status":"сумма","commission":0},{"id":182,"fmt":"студия","area":26.0,"price":45000,"est":52227,"lo":52227,"hi":52227,"basis":"известно","metro":"станция O","metro_min":7.0,"floor":2,"floors":6,"util_status":"сумма","commission":13500},{"id":183,"fmt":"студия","area":25.0,"price":50000,"est":57273,"lo":56273,"hi":58273,"basis":"оценка: счётчики","metro":"станция S","metro_min":6.0,"floor":2,"floors":2,"util_status":"счётчики сверху","commission":25000},{"id":185,"fmt":"1-к","area":51.3,"price":50000,"est":57273,"lo":56273,"hi":59023,"basis":"оценка: счётчики","metro":"станция F","metro_min":6.0,"floor":4,"floors":6,"util_status":"счётчики сверху","commission":25000},{"id":189,"fmt":"студия","area":23.0,"price":46000,"est":53091,"lo":53091,"hi":53091,"basis":"известно","metro":"станция E","metro_min":8.0,"floor":2,"floors":5,"util_status":"сумма","commission":23000},{"id":190,"fmt":"студия","area":29.0,"price":50000,"est":58182,"lo":57182,"hi":59182,"basis":"оценка коммуналки","metro":"станция E","metro_min":10.0,"floor":7,"floors":10,"util_status":"не указано","commission":35000},{"id":191,"fmt":"студия","area":33.0,"price":49000,"est":54000,"lo":54000,"hi":54000,"basis":"известно","metro":"станция F","metro_min":4.0,"floor":3,"floors":5,"util_status":"сумма","commission":0},{"id":192,"fmt":"1-к","area":32.0,"price":45000,"est":54045,"lo":54045,"hi":54045,"basis":"известно","metro":"станция H","metro_min":6.0,"floor":2,"floors":6,"util_status":"сумма","commission":22500},{"id":193,"fmt":"студия","area":32.0,"price":45000,"est":54045,"lo":54045,"hi":54045,"basis":"известно","metro":"станция M","metro_min":6.0,"floor":16,"floors":18,"util_status":"сумма","commission":22500},{"id":194,"fmt":"1-к","area":56.0,"price":45000,"est":54045,"lo":54045,"hi":54045,"basis":"известно","metro":"станция C","metro_min":5.0,"floor":1,"floors":5,"util_status":"сумма","commission":22500},{"id":195,"fmt":"студия","area":20.0,"price":45500,"est":54068,"lo":54068,"hi":54068,"basis":"известно","metro":"станция E","metro_min":10.0,"floor":7,"floors":10,"util_status":"сумма","commission":22750},{"id":197,"fmt":"1-к","area":37.0,"price":55000,"est":60000,"lo":59000,"hi":61750,"basis":"оценка: счётчики","metro":"станция B","metro_min":3.0,"floor":2,"floors":5,"util_status":"счётчики сверху","commission":0},{"id":198,"fmt":"1-к","area":33.0,"price":50000,"est":55000,"lo":55000,"hi":55000,"basis":"известно","metro":"станция O","metro_min":6.0,"floor":3,"floors":8,"util_status":"сумма","commission":0},{"id":199,"fmt":"студия","area":29.0,"price":45000,"est":55000,"lo":55000,"hi":55000,"basis":"известно","metro":"станция M","metro_min":6.0,"floor":7,"floors":8,"util_status":"сумма","commission":0},{"id":200,"fmt":"студия","area":38.0,"price":50000,"est":55000,"lo":55000,"hi":55000,"basis":"известно","metro":"станция I","metro_min":6.0,"floor":4,"floors":6,"util_status":"сумма","commission":0},{"id":204,"fmt":"студия","area":45.0,"price":55000,"est":55000,"lo":55000,"hi":55000,"basis":"известно","metro":"станция T","metro_min":6.0,"floor":4,"floors":4,"util_status":"включена","commission":0},{"id":207,"fmt":"1-к","area":41.0,"price":50000,"est":55773,"lo":55773,"hi":55773,"basis":"известно","metro":"станция J","metro_min":7.0,"floor":2,"floors":4,"util_status":"сумма","commission":25000},{"id":208,"fmt":"1-к","area":40.0,"price":50000,"est":56000,"lo":56000,"hi":56000,"basis":"известно","metro":"станция H","metro_min":11.0,"floor":1,"floors":6,"util_status":"сумма","commission":0},{"id":212,"fmt":"1-к","area":46.0,"price":56000,"est":61000,"lo":60000,"hi":62750,"basis":"оценка: счётчики","metro":"станция S","metro_min":8.0,"floor":3,"floors":6,"util_status":"счётчики сверху","commission":0},{"id":213,"fmt":"1-к","area":35.0,"price":48000,"est":56745,"lo":56745,"hi":56745,"basis":"известно","metro":"станция B","metro_min":4.0,"floor":1,"floors":7,"util_status":"сумма","commission":19200},{"id":215,"fmt":"1-к","area":35.0,"price":50000,"est":57136,"lo":57136,"hi":57136,"basis":"известно","metro":"станция C","metro_min":4.0,"floor":1,"floors":5,"util_status":"сумма","commission":40000},{"id":216,"fmt":"1-к","area":38.5,"price":55000,"est":62500,"lo":61500,"hi":64250,"basis":"оценка коммуналки","metro":"станция F","metro_min":5.0,"floor":4,"floors":8,"util_status":"не указано","commission":27500},{"id":217,"fmt":"1-к","area":39.6,"price":55000,"est":62500,"lo":61500,"hi":64250,"basis":"оценка коммуналки","metro":"станция V","metro_min":16.0,"floor":3,"floors":21,"util_status":"не указано","commission":27500},{"id":218,"fmt":"1-к","area":38.0,"price":55000,"est":58000,"lo":58000,"hi":58000,"basis":"известно","metro":"станция B","metro_min":15.0,"floor":1,"floors":6,"util_status":"сумма","commission":0},{"id":220,"fmt":"студия","area":30.0,"price":52000,"est":58000,"lo":58000,"hi":58000,"basis":"известно","metro":"станция E","metro_min":6.0,"floor":1,"floors":4,"util_status":"сумма","commission":0},{"id":225,"fmt":"1-к","area":46.0,"price":55000,"est":63500,"lo":62500,"hi":65250,"basis":"оценка коммуналки","metro":"станция G","metro_min":2.0,"floor":3,"floors":8,"util_status":"не указано","commission":38500},{"id":226,"fmt":"1-к","area":45.0,"price":59000,"est":64000,"lo":63000,"hi":65750,"basis":"оценка коммуналки","metro":"станция E","metro_min":12.0,"floor":6,"floors":6,"util_status":"не указано","commission":0},{"id":229,"fmt":"1-к","area":52.4,"price":55000,"est":61000,"lo":61000,"hi":61000,"basis":"известно","metro":"станция W","metro_min":6.0,"floor":2,"floors":6,"util_status":"сумма","commission":0},{"id":234,"fmt":"студия","area":30.0,"price":54000,"est":62000,"lo":62000,"hi":62000,"basis":"известно","metro":"станция E","metro_min":10.0,"floor":6,"floors":10,"util_status":"сумма","commission":0},{"id":235,"fmt":"студия","area":27.0,"price":55000,"est":62500,"lo":62500,"hi":62500,"basis":"известно","metro":"станция E","metro_min":10.0,"floor":2,"floors":12,"util_status":"сумма","commission":27500},{"id":237,"fmt":"студия","area":30.0,"price":55000,"est":63500,"lo":63500,"hi":63500,"basis":"известно","metro":"станция E","metro_min":6.0,"floor":1,"floors":4,"util_status":"сумма","commission":27500},{"id":238,"fmt":"студия","area":28.0,"price":60000,"est":65000,"lo":65000,"hi":65000,"basis":"известно","metro":"станция E","metro_min":10.0,"floor":10,"floors":10,"util_status":"сумма","commission":0},{"id":241,"fmt":"1-к","area":43.0,"price":60000,"est":65500,"lo":65500,"hi":65500,"basis":"известно","metro":"станция A","metro_min":5.0,"floor":2,"floors":5,"util_status":"сумма","commission":0},{"id":242,"fmt":"1-к","area":37.0,"price":53000,"est":65818,"lo":65818,"hi":65818,"basis":"известно","metro":"станция S","metro_min":4.0,"floor":3,"floors":4,"util_status":"сумма","commission":53000},{"id":244,"fmt":"1-к","area":45.0,"price":60000,"est":66000,"lo":66000,"hi":66000,"basis":"известно","metro":"станция E","metro_min":6.0,"floor":5,"floors":6,"util_status":"сумма","commission":0},{"id":245,"fmt":"1-к","area":36.0,"price":60000,"est":67000,"lo":67000,"hi":67000,"basis":"известно","metro":"станция G","metro_min":6.0,"floor":1,"floors":6,"util_status":"сумма","commission":0},{"id":246,"fmt":"студия","area":22.0,"price":60000,"est":67727,"lo":67727,"hi":67727,"basis":"известно","metro":"станция S","metro_min":2.0,"floor":2,"floors":5,"util_status":"сумма","commission":30000},{"id":247,"fmt":"1-к","area":68.0,"price":65000,"est":72955,"lo":71955,"hi":74705,"basis":"оценка коммуналки","metro":"станция S","metro_min":6.0,"floor":2,"floors":5,"util_status":"не указано","commission":32500},{"id":248,"fmt":"1-к","area":45.0,"price":63000,"est":68000,"lo":68000,"hi":68000,"basis":"известно","metro":"станция E","metro_min":7.0,"floor":3,"floors":4,"util_status":"сумма","commission":0},{"id":249,"fmt":"1-к","area":40.0,"price":55000,"est":68000,"lo":68000,"hi":68000,"basis":"известно","metro":"станция M","metro_min":6.0,"floor":5,"floors":18,"util_status":"сумма","commission":55000},{"id":250,"fmt":"1-к","area":59.7,"price":60000,"est":68727,"lo":68727,"hi":68727,"basis":"известно","metro":"станция Q","metro_min":6.0,"floor":4,"floors":5,"util_status":"сумма","commission":30000},{"id":251,"fmt":"1-к","area":46.3,"price":60000,"est":68727,"lo":68727,"hi":68727,"basis":"известно","metro":"станция G","metro_min":2.0,"floor":5,"floors":5,"util_status":"сумма","commission":30000},{"id":252,"fmt":"1-к","area":41.0,"price":60000,"est":69455,"lo":69455,"hi":69455,"basis":"известно","metro":"станция C","metro_min":5.0,"floor":5,"floors":7,"util_status":"сумма","commission":60000},{"id":254,"fmt":"1-к","area":36.0,"price":70000,"est":70000,"lo":70000,"hi":70000,"basis":"известно","metro":"станция M","metro_min":6.0,"floor":4,"floors":18,"util_status":"включена","commission":0},{"id":255,"fmt":"студия","area":45.0,"price":70000,"est":75000,"lo":74000,"hi":76000,"basis":"оценка коммуналки","metro":"станция I","metro_min":7.0,"floor":3,"floors":6,"util_status":"не указано","commission":0},{"id":256,"fmt":"1-к","area":42.0,"price":60000,"est":70000,"lo":70000,"hi":70000,"basis":"известно","metro":"станция A","metro_min":4.0,"floor":5,"floors":5,"util_status":"сумма","commission":0},{"id":260,"fmt":"1-к","area":53.9,"price":65000,"est":73000,"lo":73000,"hi":73000,"basis":"известно","metro":"станция L","metro_min":8.0,"floor":3,"floors":4,"util_status":"сумма","commission":0},{"id":261,"fmt":"1-к","area":47.0,"price":65000,"est":72955,"lo":72955,"hi":72955,"basis":"известно","metro":"станция D","metro_min":8.0,"floor":4,"floors":4,"util_status":"сумма","commission":32500},{"id":262,"fmt":"1-к","area":40.0,"price":70000,"est":73182,"lo":73182,"hi":73182,"basis":"известно","metro":null,"metro_min":10.0,"floor":3,"floors":5,"util_status":"включена","commission":35000},{"id":263,"fmt":"студия","area":38.0,"price":70000,"est":76000,"lo":76000,"hi":76000,"basis":"известно","metro":"станция U","metro_min":5.0,"floor":2,"floors":3,"util_status":"сумма","commission":0},{"id":264,"fmt":"1-к","area":35.0,"price":75000,"est":78000,"lo":78000,"hi":78000,"basis":"известно","metro":"станция D","metro_min":7.0,"floor":3,"floors":5,"util_status":"сумма","commission":0},{"id":266,"fmt":"1-к","area":52.0,"price":75000,"est":80000,"lo":80000,"hi":80000,"basis":"известно","metro":"станция K","metro_min":14.0,"floor":4,"floors":5,"util_status":"сумма","commission":0},{"id":267,"fmt":"студия","area":31.0,"price":80000,"est":85000,"lo":84000,"hi":86000,"basis":"оценка: счётчики","metro":"станция E","metro_min":9.0,"floor":3,"floors":5,"util_status":"счётчики сверху","commission":0},{"id":268,"fmt":"1-к","area":62.0,"price":80000,"est":83636,"lo":83636,"hi":83636,"basis":"известно","metro":"станция I","metro_min":9.0,"floor":3,"floors":4,"util_status":"включена","commission":40000},{"id":271,"fmt":"студия","area":34.9,"price":75000,"est":87773,"lo":87773,"hi":87773,"basis":"известно","metro":"станция E","metro_min":10.0,"floor":10,"floors":10,"util_status":"сумма","commission":52500},{"id":273,"fmt":"1-к","area":35.0,"price":85000,"est":92000,"lo":92000,"hi":92000,"basis":"известно","metro":"станция E","metro_min":10.0,"floor":6,"floors":10,"util_status":"сумма","commission":0},{"id":274,"fmt":"студия","area":38.0,"price":90000,"est":98591,"lo":98591,"hi":98591,"basis":"известно","metro":"станция H","metro_min":6.0,"floor":2,"floors":6,"util_status":"сумма","commission":45000},{"id":275,"fmt":"1-к","area":50.1,"price":95000,"est":104318,"lo":103318,"hi":106068,"basis":"оценка: счётчики","metro":"станция E","metro_min":7.0,"floor":4,"floors":4,"util_status":"счётчики сверху","commission":47500},{"id":276,"fmt":"1-к","area":42.0,"price":90000,"est":103182,"lo":103182,"hi":103182,"basis":"известно","metro":"станция B","metro_min":8.0,"floor":1,"floors":6,"util_status":"сумма","commission":90000},{"id":277,"fmt":"1-к","area":56.3,"price":90000,"est":105727,"lo":105727,"hi":105727,"basis":"известно","metro":"станция S","metro_min":6.0,"floor":3,"floors":4,"util_status":"сумма","commission":63000},{"id":279,"fmt":"1-к","area":48.0,"price":100000,"est":110545,"lo":110545,"hi":110545,"basis":"известно","metro":"станция Q","metro_min":18.0,"floor":6,"floors":10,"util_status":"сумма","commission":50000},{"id":280,"fmt":"1-к","area":40.0,"price":100000,"est":115091,"lo":115091,"hi":115091,"basis":"известно","metro":"станция W","metro_min":3.0,"floor":6,"floors":9,"util_status":"сумма","commission":100000},{"id":281,"fmt":"1-к","area":50.0,"price":113000,"est":120000,"lo":120000,"hi":120000,"basis":"известно","metro":"станция W","metro_min":4.0,"floor":2,"floors":8,"util_status":"сумма","commission":0},{"id":282,"fmt":"1-к","area":88.5,"price":115000,"est":125455,"lo":125455,"hi":125455,"basis":"известно","metro":"станция L","metro_min":8.0,"floor":4,"floors":5,"util_status":"включена","commission":115000},{"id":284,"fmt":"1-к","area":67.0,"price":145000,"est":160000,"lo":160000,"hi":160000,"basis":"известно","metro":"станция W","metro_min":3.0,"floor":7,"floors":8,"util_status":"сумма","commission":0}],"top10_change":{"total_month_est":{"dropped_pct":20,"kendall_tau":0.89},"total_month_lo":{"dropped_pct":20,"kendall_tau":0.88},"total_month_hi":{"dropped_pct":20,"kendall_tau":0.88}}},"flow":{"months":["2025-01","2025-02","2025-03","2025-04","2025-05","2025-06","2025-07","2025-08","2025-09","2025-10","2025-11","2025-12","2026-01","2026-02","2026-03","2026-04","2026-05","2026-06","2026-07","2026-08","2026-09","2026-10"],"by_month":{"все":[18,12,21,23,13,21,25,26,22,43,30,22,24,32,23,23,22,20,31,47,48,29],"точка по дому":[13,6,13,14,6,13,13,20,13,29,24,16,17,19,12,13,13,11,18,26,30,17],"метро + фитнес":[8,3,4,6,0,4,6,10,4,7,7,6,3,4,6,6,4,3,6,15,14,10],"метро + садик + поликлиника":[7,3,6,5,0,4,6,10,5,9,8,7,3,5,6,6,4,3,6,15,15,10],"метро + каток с названием":[0,0,2,0,0,1,0,0,0,1,1,0,0,0,0,0,1,0,1,3,3,3]},"summary":{"Telegram: медиана в месяц (21 полных мес.)":{"все":23.0,"точка по дому":13.0,"метро + фитнес":6.0,"метро + садик + поликлиника":6.0,"метро + каток с названием":0.0},"Telegram: меньше всего за месяц":{"все":12.0,"точка по дому":6.0,"метро + фитнес":0.0,"метро + садик + поликлиника":0.0,"метро + каток с названием":0.0},"Telegram: больше всего за месяц":{"все":48.0,"точка по дому":30.0,"метро + фитнес":15.0,"метро + садик + поликлиника":15.0,"метро + каток с названием":3.0},"Циан: опубликовано за 30 дней до сбора":{"все":137.0,"точка по дому":137.0,"метро + фитнес":132.0,"метро + садик + поликлиника":116.0,"метро + каток с названием":15.0},"Циан: всего собрано (27.08–17.10.2026)":{"все":140.0,"точка по дому":140.0,"метро + фитнес":135.0,"метро + садик + поликлиника":117.0,"метро + каток с названием":15.0}},"tg_median_month":23.0,"profiles_note":"≤ 15 мин пешком до каждого места, только точка по дому (geo_precise)"},"util_medians":[{"group":"студия","n":71,"p25":4000.0,"median":5000.0,"p75":6000.0,"used_for":["студия"]},{"group":"1-к","n":59,"p25":4000.0,"median":5000.0,"p75":6750.0,"used_for":["1-к"]},{"group":"2-к","n":8,"p25":5000.0,"median":5500.0,"p75":7000.0,"used_for":["2-к"]},{"group":"3+","n":1,"p25":18000.0,"median":18000.0,"p75":18000.0,"used_for":[]},{"group":"2+","n":9,"p25":5000.0,"median":6000.0,"p75":7000.0,"used_for":["3+"]},{"group":"все","n":140,"p25":4000.0,"median":5000.0,"p75":6238.0,"used_for":[]}],"extra_cost":{"n":140,"est_median":6000.0,"est_over10":0.65,"known_median":5636.0,"known_over10":0.55,"commission_share":0.5143,"commission_median":23900.0,"util_not_included":0.8429,"note":"Циан, долгая аренда, подготовленный набор: доплата = полная цена − цена объявления; est — с оценкой неизвестной коммуналки (главная цифра), known — только указанные в объявлении платежи (нижняя граница); доли — от 0 до 1"},"author_cost":{"market_commission":{"n":48.0,"mean":25393.854166666668,"median":22500.0,"p25":16375.0,"p75":32500.0},"Циан":{"собственник":{"n":39.0,"полная, медиана, ₽ (lo)":56000.0,"боль > 10%, % (lo)":35.9,"полная, медиана, ₽ (est)":56000.0,"боль > 10%, % (est)":41.0,"полная, медиана, ₽ (hi)":56000.0,"боль > 10%, % (hi)":53.8},"риэлтор":{"n":75.0,"полная, медиана, ₽ (lo)":47045.0,"боль > 10%, % (lo)":76.0,"полная, медиана, ₽ (est)":47045.0,"боль > 10%, % (est)":77.3,"полная, медиана, ₽ (hi)":47955.0,"боль > 10%, % (hi)":80.0},"вероятно риэлтор":{"n":24.0,"полная, медиана, ₽ (lo)":52659.0,"боль > 10%, % (lo)":87.5,"полная, медиана, ₽ (est)":52659.0,"боль > 10%, % (est)":87.5,"полная, медиана, ₽ (hi)":52659.0,"боль > 10%, % (hi)":91.7},"неизвестно":{"n":2.0,"полная, медиана, ₽ (lo)":53000.0,"боль > 10%, % (lo)":50.0,"полная, медиана, ₽ (est)":null,"боль > 10%, % (est)":null,"полная, медиана, ₽ (hi)":55045.0,"боль > 10%, % (hi)":50.0},"все":{"n":140.0,"полная, медиана, ₽ (lo)":50909.0,"боль > 10%, % (lo)":66.4,"полная, медиана, ₽ (est)":50636.5,"боль > 10%, % (est)":68.8,"полная, медиана, ₽ (hi)":51609.5,"боль > 10%, % (hi)":74.3}},"Telegram":{"собственник":{"n":20.0,"полная, медиана, ₽ (lo)":49000.0,"боль > 10%, % (lo)":35.0,"полная, медиана, ₽ (est)":50000.0,"боль > 10%, % (est)":70.0,"полная, медиана, ₽ (hi)":51750.0,"боль > 10%, % (hi)":80.0},"риэлтор":{"n":2.0,"полная, медиана, ₽ (lo)":44489.0,"боль > 10%, % (lo)":100.0,"полная, медиана, ₽ (est)":46045.0,"боль > 10%, % (est)":100.0,"полная, медиана, ₽ (hi)":48330.0,"боль > 10%, % (hi)":100.0},"вероятно риэлтор":{"n":0.0,"полная, медиана, ₽ (lo)":null,"боль > 10%, % (lo)":null,"полная, медиана, ₽ (est)":null,"боль > 10%, % (est)":null,"полная, медиана, ₽ (hi)":null,"боль > 10%, % (hi)":null},"неизвестно":{"n":553.0,"полная, медиана, ₽ (lo)":51000.0,"боль > 10%, % (lo)":32.7,"полная, медиана, ₽ (est)":null,"боль > 10%, % (est)":null,"полная, медиана, ₽ (hi)":55045.0,"боль > 10%, % (hi)":91.1},"все":{"n":575.0,"полная, медиана, ₽ (lo)":50000.0,"боль > 10%, % (lo)":33.0,"полная, медиана, ₽ (est)":50000.0,"боль > 10%, % (est)":72.7,"полная, медиана, ₽ (hi)":54045.0,"боль > 10%, % (hi)":90.8}},"cian_unknown_with_commission":24,"cian_realtor_commission_zero":27},"drivers_score":[{"label":"фитнес-клуб","share_near15":86.5,"median_points":46.7},{"label":"детский сад","share_near15":99.4,"median_points":50.0},{"label":"школа","share_near15":98.8,"median_points":50.0},{"label":"поликлиника или больница","share_near15":87.9,"median_points":50.0},{"label":"каток (все объекты)","share_near15":16.1,"median_points":23.3},{"label":"каток с названием","share_near15":7.9,"median_points":23.3},{"label":"стадион или спорткомплекс","share_near15":87.9,"median_points":43.3},{"label":"парк","share_near15":90.9,"median_points":50.0}],"hero_apartment":{"source":"Циан","fmt":"студия","area":24.0,"metro":null,"metro_min":4.0,"driver_label":"парк","driver_min":1.0,"score":100,"price_est":34500},"factoid_1k":{"price_median":50000.0,"util_median":5000.0,"pct_increase":0.1}}</script>
+<script type="application/json" id="econ-data">{"generated_by":"_build/build_econ.py","currency":"₽","usd_rate_date":"31.10.2026","tokens_estimated":false,"flow_from_data":true,"functions":{"CEILING(x, s)":"округление вверх до кратного s (Math.ceil(x / s) * s)","IF(c, a, b)":"c ? a : b","MAX(a, b)":"Math.max","MIN(a, b)":"Math.min","NEVER":"не окупается: Infinity в JS, null в JSON, текст в Excel"},"order_note":"формулы считать по порядку списка formulas: каждая ссылается только на допущения и формулы выше","params":[{"key":"reach","label":"Охват: ищущих квартиру, которые увидели бота","base":15000,"min":1000,"max":100000,"step":1000,"unit":"чел./мес","group":"1. Воронка в месяц","source":"допущение: аудитория партнёрского канала и чатов аренды; главная неизвестная — проверяется пилотом","slider":true},{"key":"c_start","label":"Конверсия: запустили бота","base":0.04,"min":0.005,"max":0.2,"step":0.005,"unit":"доля","group":"1. Воронка в месяц","source":"допущение: выше CTR рекламы в Telegram (0,2–0,9%), потому что аудитория уже ищет и пост закреплён админом","slider":true},{"key":"c_activate","label":"Конверсия: потратили бесплатные сообщения (активация)","base":0.4,"min":0.1,"max":0.9,"step":0.05,"unit":"доля","group":"1. Воронка в месяц","source":"допущение: часть запустивших бросает после 1–2 сообщений","slider":true},{"key":"c_pay","label":"Конверсия: оплатили (из активированных)","base":0.08,"min":0.01,"max":0.3,"step":0.01,"unit":"доля","group":"1. Воронка в месяц","source":"из бенчмарка: c_activate × c_pay = 3,2% из запустивших — нижний край «хорошо» 3–5% для freemium; бенчмарк: freemium self-serve, из регистраций в оплату 3–5% «хорошо», 6–8% «отлично» (K. Poyar, Lenny's Newsletter, 2023: lennysnewsletter.com/p/what-is-a-good-free-to-paid-conversion; пересказ — schematichq.com/blog/freemium-to-paid-conversion-saas)","slider":true},{"key":"p_day","label":"Тариф «день»","base":99,"min":49,"max":299,"step":10,"unit":"₽","group":"2. Тарифы и доход с платящего","source":"решение продукта","slider":true},{"key":"p_week","label":"Тариф «неделя»","base":390,"min":190,"max":990,"step":10,"unit":"₽","group":"2. Тарифы и доход с платящего","source":"решение продукта","slider":true},{"key":"p_month","label":"Тариф «месяц»","base":990,"min":490,"max":2990,"step":10,"unit":"₽","group":"2. Тарифы и доход с платящего","source":"решение продукта","slider":true},{"key":"sh_day","label":"Доля покупок «день»","base":0.3,"min":0,"max":1,"step":0.05,"unit":"доля","group":"2. Тарифы и доход с платящего","source":"допущение: пробуют на день перед выбором","slider":true},{"key":"sh_week","label":"Доля покупок «неделя»","base":0.5,"min":0,"max":1,"step":0.05,"unit":"доля","group":"2. Тарифы и доход с платящего","source":"допущение: поиск идёт 2–4 недели, чаще берут неделю","slider":true},{"key":"apc","label":"APC: покупок на платящего за поиск (с продлениями)","base":1.1,"min":1,"max":3,"step":0.1,"unit":"покупок","group":"2. Тарифы и доход с платящего","source":"допущение, а не измерение: быстрый поиск сокращает продления, докупает вторую подписку ~10% платящих (при долгом поиске было бы ~20%, APC 1,2); APC — риск, а не рычаг роста","slider":true},{"key":"tok_in","label":"Входные токены на вызов","base":5853,"min":0,"max":17559,"step":175.59,"unit":"токенов","group":"3. Стоимость одного вызова модели","source":"измерено: среднее по 15 вызовам прогона агента (deepseek/deepseek-v4.1-flash), data/agent_log.csv","slider":false},{"key":"tok_out","label":"Выходные токены на вызов","base":186,"min":0,"max":558,"step":5.58,"unit":"токенов","group":"3. Стоимость одного вызова модели","source":"измерено там же","slider":false},{"key":"p_in","label":"Цена входа за 1 млн токенов","base":0.045,"min":0.01,"max":5,"step":0.005,"unit":"$","group":"3. Стоимость одного вызова модели","source":"DeepSeek V4.1 Flash на OpenRouter (deepseek/deepseek-v4.1-flash), каталог openrouter.ai/api/v1/models, 30.10.2026","slider":true},{"key":"p_out","label":"Цена выхода за 1 млн токенов","base":0.5,"min":0.1,"max":20,"step":0.01,"unit":"$","group":"3. Стоимость одного вызова модели","source":"там же","slider":true},{"key":"or_fee","label":"Комиссия OpenRouter при пополнении баланса","base":0.055,"min":0,"max":0.165,"step":0.00165,"unit":"доля","group":"3. Стоимость одного вызова модели","source":"openrouter.ai/pricing, тариф Standard: 5,5% при покупке кредитов, наценки на токены нет; 30.10.2026","slider":false},{"key":"usd","label":"Курс доллара","base":85,"min":60,"max":130,"step":1,"unit":"₽","group":"3. Стоимость одного вызова модели","source":"курс на 31.10.2026","slider":true},{"key":"lim_out","label":"max_tokens ответа агента","base":500,"min":0,"max":1500,"step":15.0,"unit":"токенов","group":"3. Стоимость одного вызова модели","source":"как у Рекомендателя в ЛР7: агент сам пишет итоговый ответ (до 8 строк); задано в ноутбуке агента","slider":false},{"key":"calls_turn","label":"Вызовов модели на одно сообщение пользователя","base":1.5,"min":1,"max":5,"step":0.1,"unit":"вызовов","group":"4. Сообщения и затраты на модель в диалоге","source":"измерено: 15 вызовов на 10 сообщений","slider":false},{"key":"k_over","label":"Запас на повторы, ошибки и рост истории диалога","base":2,"min":1,"max":5,"step":0.5,"unit":"×","group":"4. Сообщения и затраты на модель в диалоге","source":"допущение: накладные ×2 к токенам","slider":false},{"key":"free_msgs","label":"Бесплатных сообщений на пользователя","base":10,"min":0,"max":50,"step":1,"unit":"сообщений","group":"4. Сообщения и затраты на модель в диалоге","source":"решение продукта: один день поиска бесплатно","slider":true},{"key":"drop_share","label":"Доля бесплатного лимита, которую тратит неактивированный","base":0.3,"min":0,"max":1,"step":0.05,"unit":"доля","group":"4. Сообщения и затраты на модель в диалоге","source":"допущение: бросившие успевают написать 2–4 сообщения из 10","slider":false},{"key":"turns_day","label":"Сообщений платящего в активный день","base":10,"min":1,"max":50,"step":1,"unit":"сообщений","group":"4. Сообщения и затраты на модель в диалоге","source":"допущение: 3 сессии по 3–4 сообщения","slider":true},{"key":"active_share","label":"Доля дней подписки, когда человек пишет боту","base":0.5,"min":0.1,"max":1,"step":0.05,"unit":"доля","group":"4. Сообщения и затраты на модель в диалоге","source":"допущение: по выходным и вечерам; у тарифа «месяц» активных дней меньше половины","slider":true},{"key":"flow_tg","label":"Новых объявлений долгой аренды в месяц в одном канале","base":23.0,"min":0,"max":69.0,"step":0.69,"unit":"объявлений","group":"5. Разбор объявлений (гибрид: регулярки + LLM)","source":"измерено: медиана по полным месяцам 2025–2026, ноутбук данных, «Поток объявлений»","slider":false},{"key":"scale_city","label":"Масштаб на город (источников больше, чем один канал)","base":100,"min":1,"max":500,"step":1,"unit":"×","group":"5. Разбор объявлений (гибрид: регулярки + LLM)","source":"допущение: десятки каналов и чатов аренды + фид площадки; проверка сверху: на Циане 137 новых студий и 1-к за 30 дней в 3 соседних станциях; × 72 станции / 3 ÷ 0 74 (доля студий и 1-к в канале) ≈ 4 443 в месяц только на Циане  то есть ×193 к каналу","slider":true},{"key":"llm_share","label":"Доля объявлений, которая уходит в LLM","base":1.0,"min":0,"max":1,"step":0.05,"unit":"доля","group":"5. Разбор объявлений (гибрид: регулярки + LLM)","source":"измерено: гибрид по полям (коммуналка, комиссия, залог, роль автора) отправил в модель 100% постов эталона: по каждой группе полей регулярки пусты у 130–184 из 200, а один вызов разбирает пост целиком; экономии на доле постов нет","slider":true},{"key":"x_in","label":"Входные токены на разбор объявления","base":4531,"min":0,"max":13593,"step":135.93,"unit":"токенов","group":"5. Разбор объявлений (гибрид: регулярки + LLM)","source":"измерено: прогон модели на эталоне  906 201 токенов входа и 140 114 выхода на 200 вызовов (eval_results.json)","slider":false},{"key":"x_out","label":"Выходные токены на разбор объявления","base":701,"min":0,"max":2103,"step":21.03,"unit":"токенов","group":"5. Разбор объявлений (гибрид: регулярки + LLM)","source":"там же: выход / вызовов (включает reasoning-токены)","slider":false},{"key":"hosting","label":"Сервер (VPS 2 ядра / 4 ГБ, PostgreSQL и n8n на нём же)","base":1500,"min":0,"max":4500,"step":45.0,"unit":"₽/мес","group":"6. Постоянные затраты в месяц","source":"допущение по тарифам российских облаков","slider":false},{"key":"support_h","label":"Поддержка: часы в месяц","base":8,"min":0,"max":24,"step":0.24,"unit":"ч","group":"6. Постоянные затраты в месяц","source":"допущение: парсеры ломаются, очередь HITL, ответы на жалобы","slider":true},{"key":"rate","label":"Ставка часа (разработка и поддержка)","base":1500,"min":0,"max":4500,"step":45.0,"unit":"₽/ч","group":"6. Постоянные затраты в месяц","source":"допущение: фриланс-ставка аналитика/разработчика","slider":false},{"key":"acq","label":"Эквайринг","base":0.035,"min":0,"max":0.10500000000000001,"step":0.0010500000000000002,"unit":"доля","group":"7. Доли от выручки","source":"типичная комиссия платёжного сервиса","slider":false},{"key":"tax","label":"Налог (УСН «доходы»)","base":0.06,"min":0,"max":0.18,"step":0.0018,"unit":"доля","group":"7. Доли от выручки","source":"НК РФ, ст. 346.20","slider":false},{"key":"admin_share","label":"Доля администратору партнёрского канала","base":0.2,"min":0,"max":0.5,"step":0.01,"unit":"доля","group":"7. Доли от выручки","source":"допущение: админ даёт охват вместо платной рекламы; 20% — середина обычных реферальных ставок 10–30%","slider":true},{"key":"cpm","label":"CPM посева в каналах об аренде","base":1000,"min":200,"max":3000,"step":50,"unit":"₽ за 1000 просмотров","group":"8. Привлечение","source":"бенчмарк: рабочий CPM посевов в Telegram — от ~800 ₽ (vc.ru/1043963-cpm-v-telegram-ponyatiya-sovety-podborka-nish), тематические каналы дороже (Hope Group, workspace.ru); цена поста +38% за 2024 (elama.ru)","slider":true},{"key":"ctr_ad","label":"Просмотр посева → запуск бота","base":0.01,"min":0.001,"max":0.03,"step":0.001,"unit":"доля","group":"8. Привлечение","source":"бенчмарк: CTR рекламы в Telegram 0,2–0,9% (kod.ru/telegram-ads-cheaper-q2-2026, 2026); посев в профильном канале — около 1% (кейс sostav.ru: CTR 1,11%)","slider":true},{"key":"paid_share","label":"Доля платящих, пришедших с платной рекламы","base":0.1,"min":0,"max":1,"step":0.05,"unit":"доля","group":"8. Привлечение","source":"допущение: в пилоте рост через партнёрский канал (оплачен долей админа) и рекомендации; платный посев — проверка гипотез, ~1 из 10 платящих. При 20% вклад на платящего уже отрицательный — см. «Рычаги»","slider":true},{"key":"dev_h","label":"Доработка прототипа до бота в Telegram","base":120,"min":0,"max":360,"step":3.6,"unit":"ч","group":"9. Разовые затраты на разработку","source":"допущение: бот, база, регулярная загрузка, тесты","slider":true},{"key":"label_h","label":"Разметка тестового набора (200 + 30 постов)","base":20,"min":0,"max":60,"step":0.6,"unit":"ч","group":"9. Разовые затраты на разработку","source":"из этапа 4","slider":false},{"key":"label_rate","label":"Ставка асессора","base":500,"min":0,"max":1500,"step":15.0,"unit":"₽/ч","group":"9. Разовые затраты на разработку","source":"допущение","slider":false}],"formulas":[{"key":"starts","label":"Запустили бота","expr":"reach*c_start","words":"охват × конверсия в запуск","unit":"чел./мес","group":"1. Воронка в месяц","note":""},{"key":"activated","label":"Активированы (потратили бесплатные)","expr":"starts*c_activate","words":"запустили × конверсия в активацию","unit":"чел./мес","group":"1. Воронка в месяц","note":""},{"key":"payers","label":"Платящих в месяц","expr":"activated*c_pay","words":"активированные × конверсия в оплату","unit":"чел./мес","group":"1. Воронка в месяц","note":"один платящий = один поиск квартиры"},{"key":"plan","label":"План: платящих в месяц (= воронка)","expr":"payers","words":"= платящих в месяц","unit":"чел./мес","group":"1. Воронка в месяц","note":"прежний ключ отчёта; теперь не допущение, а итог воронки"},{"key":"sh_month","label":"Доля покупок «месяц»","expr":"1-sh_day-sh_week","words":"1 − доля «день» − доля «неделя»","unit":"доля","group":"2. Тарифы и доход с платящего","note":"остаток: сумма долей = 100%"},{"key":"check","label":"Средний чек покупки","expr":"sh_day*p_day+sh_week*p_week+sh_month*p_month","words":"Σ доля тарифа × цена тарифа","unit":"₽","group":"2. Тарифы и доход с платящего","note":"взвешенный по долям тарифов"},{"key":"sub_days","label":"Дней подписки на одну покупку","expr":"sh_day*1+sh_week*7+sh_month*30","words":"доля «день» × 1 + доля «неделя» × 7 + доля «месяц» × 30","unit":"дней","group":"2. Тарифы и доход с платящего","note":"из тарифов: 1 / 7 / 30"},{"key":"rev_payer","label":"Выручка на платящего","expr":"check*apc","words":"средний чек × APC","unit":"₽","group":"2. Тарифы и доход с платящего","note":"чек × APC"},{"key":"call_usd","label":"Стоимость вызова","expr":"(tok_in*p_in+tok_out*p_out)/1000000*(1+or_fee)","words":"(токены вход × цена входа + токены выход × цена выхода) / 1 000 000 × (1 + комиссия OpenRouter)","unit":"$","group":"3. Стоимость одного вызова модели","note":"формула из задания + комиссия OpenRouter сверху"},{"key":"call_rub","label":"Стоимость вызова","expr":"call_usd*usd","words":"стоимость вызова в $ × курс","unit":"₽","group":"3. Стоимость одного вызова модели","note":""},{"key":"call_max","label":"Вызов на потолке выхода","expr":"(tok_in*p_in+lim_out*p_out)/1000000*(1+or_fee)*usd","words":"как вызов, но выход = max_tokens, в ₽","unit":"₽","group":"3. Стоимость одного вызова модели","note":"худший случай: ответ упёрся в max_tokens"},{"key":"msg_rub","label":"Стоимость одного сообщения пользователя","expr":"call_rub*calls_turn*k_over","words":"вызов в ₽ × вызовов на сообщение × запас","unit":"₽","group":"4. Сообщения и затраты на модель в диалоге","note":""},{"key":"model_sub","label":"Модель на одну покупку","expr":"sub_days*active_share*turns_day*msg_rub","words":"дней на покупку × доля активных дней × сообщений в день × стоимость сообщения","unit":"₽","group":"4. Сообщения и затраты на модель в диалоге","note":""},{"key":"model_paid","label":"Модель на платящего (все покупки)","expr":"model_sub*apc","words":"модель на покупку × APC","unit":"₽","group":"4. Сообщения и затраты на модель в диалоге","note":""},{"key":"free_month","label":"Модель на бесплатных в месяц","expr":"(activated*free_msgs+(starts-activated)*free_msgs*drop_share)*msg_rub","words":"(активированные × бесплатных сообщений + бросившие × бесплатных × доля лимита бросивших) × стоимость сообщения","unit":"₽/мес","group":"4. Сообщения и затраты на модель в диалоге","note":"активированные тратят весь лимит, бросившие — его часть"},{"key":"free_payer","label":"Бесплатные, в пересчёте на платящего","expr":"free_month/MAX(payers,0.0001)","words":"модель на бесплатных в месяц / платящих в месяц","unit":"₽","group":"4. Сообщения и затраты на модель в диалоге","note":"≈ (1 / c_pay − 1) активированных и бросившие на одного платящего"},{"key":"listings","label":"Новых объявлений в месяц (разбор в фоне)","expr":"flow_tg*scale_city","words":"поток одного канала × масштаб на город","unit":"объявлений","group":"5. Разбор объявлений (гибрид: регулярки + LLM)","note":""},{"key":"parse_rub","label":"Стоимость разбора одного объявления моделью","expr":"(x_in*p_in+x_out*p_out)/1000000*(1+or_fee)*usd","words":"(токены вход × цена входа + токены выход × цена выхода) / 1 000 000 × (1 + комиссия) × курс","unit":"₽","group":"5. Разбор объявлений (гибрид: регулярки + LLM)","note":""},{"key":"extract","label":"Разбор объявлений моделью","expr":"listings*llm_share*parse_rub","words":"объявлений × доля в LLM × стоимость разбора","unit":"₽/мес","group":"5. Разбор объявлений (гибрид: регулярки + LLM)","note":"один раз на объявление, результат кэшируется; регулярки — бесплатно"},{"key":"static","label":"Итого постоянные затраты","expr":"extract+hosting+support_h*rate","words":"разбор + сервер + часы поддержки × ставка","unit":"₽/мес","group":"6. Постоянные затраты в месяц","note":""},{"key":"var_pct","label":"Итого доли от выручки","expr":"acq+tax+admin_share","words":"эквайринг + налог + доля админа","unit":"доля","group":"7. Доли от выручки","note":""},{"key":"cac_paid","label":"CAC платного канала на платящего","expr":"cpm/1000/ctr_ad/(c_activate*c_pay)","words":"CPM / 1000 / CTR в запуск / (активация × оплата)","unit":"₽","group":"8. Привлечение","note":"цена просмотра / конверсия в запуск / активация / оплата"},{"key":"cac","label":"CAC на платящего (смешанный)","expr":"paid_share*cac_paid","words":"доля платного трафика × CAC платного","unit":"₽","group":"8. Привлечение","note":"органика — без прямых затрат"},{"key":"dev","label":"Итого разработка","expr":"dev_h*rate+label_h*label_rate","words":"часы разработки × ставка + часы разметки × ставка асессора","unit":"₽","group":"9. Разовые затраты на разработку","note":""},{"key":"ltv","label":"LTV: вклад платящего до привлечения","expr":"rev_payer*(1-var_pct)-model_paid-free_payer","words":"выручка на платящего × (1 − доли) − модель платящего − бесплатные на платящего","unit":"₽","group":"10. Итоги","note":"выручка за поиск за вычетом долей, модели и бесплатных"},{"key":"contrib","label":"Вклад на платящего после привлечения","expr":"ltv-cac","words":"LTV − CAC","unit":"₽","group":"10. Итоги","note":""},{"key":"ltv_cac","label":"LTV / CAC","expr":"ltv/MAX(cac,0.01)","words":"LTV / CAC","unit":"×","group":"10. Итоги","note":"≥ 3 — здоровая экономика, < 1 — каждый платящий в минус"},{"key":"margin","label":"Маржа с одной покупки (до доли админа и привлечения)","expr":"check*(1-acq-tax)-model_sub","words":"чек × (1 − эквайринг − налог) − модель на покупку","unit":"₽","group":"10. Итоги","note":"прежний ключ отчёта"},{"key":"model_share","label":"Доля модели в выручке на платящего","expr":"(model_paid+free_payer)/rev_payer","words":"(модель платящего + бесплатные на платящего) / выручка на платящего","unit":"доля","group":"10. Итоги","note":"показывает, что API — не главная статья"},{"key":"revenue_month","label":"Выручка в месяц","expr":"payers*rev_payer","words":"платящих × выручка на платящего","unit":"₽/мес","group":"10. Итоги","note":""},{"key":"profit_month","label":"Прибыль в месяц","expr":"payers*contrib-static","words":"платящих × вклад − постоянные","unit":"₽/мес","group":"10. Итоги","note":"до разработки"},{"key":"be_month","label":"Безубыточность: платящих в месяц","expr":"IF(contrib>0,CEILING(static/contrib,1),NEVER)","words":"если вклад > 0: ⌈постоянные / вклад⌉, иначе «не окупается»","unit":"чел./мес","group":"10. Итоги","note":"сколько платящих покрывают постоянные затраты"},{"key":"be_dev","label":"Платящих, чтобы вернуть разработку","expr":"IF(contrib>0,CEILING(dev/contrib,1),NEVER)","words":"если вклад > 0: ⌈разработка / вклад⌉, иначе «не окупается»","unit":"чел.","group":"10. Итоги","note":"сверх покрытия постоянных"},{"key":"payback","label":"Окупаемость разработки","expr":"IF(profit_month>0,dev/profit_month,NEVER)","words":"если прибыль > 0: разработка / прибыль в месяц, иначе «не окупается»","unit":"мес","group":"10. Итоги","note":""}],"outputs":["payers","check","rev_payer","ltv","cac","contrib","ltv_cac","static","profit_month","be_month","payback","model_share"],"models":[{"name":"DeepSeek V4.1 Flash","slug":"deepseek/deepseek-v4.1-flash","p_in":0.045,"p_out":0.5,"note":"основная","catalog":"каталог openrouter.ai/api/v1/models, 30.10.2026"},{"name":"Kimi K2.6","slug":"moonshotai/kimi-k2.6","p_in":0.65,"p_out":3.41,"note":"запасная, если у DeepSeek хуже русский текст","catalog":"каталог openrouter.ai/api/v1/models, 30.10.2026"},{"name":"Kimi K3.1 Pro","slug":"moonshotai/kimi-k3.1-pro","p_in":2.0,"p_out":10.0,"note":"флагман: только для спорных случаев","catalog":"каталог openrouter.ai/api/v1/models, 30.10.2026"}],"presets":{"пессимист":{"reach":8000,"c_start":0.02,"c_activate":0.3,"c_pay":0.05,"sh_day":0.5,"sh_week":0.4,"apc":1.0,"cpm":1500,"ctr_ad":0.005,"paid_share":0.3},"база":{"reach":15000,"c_start":0.04,"c_activate":0.4,"c_pay":0.08,"p_day":99,"p_week":390,"p_month":990,"sh_day":0.3,"sh_week":0.5,"apc":1.1,"tok_in":5853,"tok_out":186,"p_in":0.045,"p_out":0.5,"or_fee":0.055,"usd":85,"lim_out":500,"calls_turn":1.5,"k_over":2,"free_msgs":10,"drop_share":0.3,"turns_day":10,"active_share":0.5,"flow_tg":23.0,"scale_city":100,"llm_share":1.0,"x_in":4531,"x_out":701,"hosting":1500,"support_h":8,"rate":1500,"acq":0.035,"tax":0.06,"admin_share":0.2,"cpm":1000,"ctr_ad":0.01,"paid_share":0.1,"dev_h":120,"label_h":20,"label_rate":500},"оптимист":{"reach":30000,"c_start":0.08,"c_activate":0.5,"c_pay":0.12,"sh_day":0.2,"sh_week":0.5,"cpm":800,"ctr_ad":0.015,"paid_share":0.05}},"presets_note":"пресет = подмена допущений поверх базы; «база» — все базовые значения. пессимист: из запустивших платят 1,5% (ниже «хорошо» freemium), CTR посева 0,5%; оптимист: 6% («отлично» freemium), CTR 1,5%; охват ×0,5 / ×2; доля платного трафика 30% / 5%; APC не растёт ни в одном сценарии: пессимист — продлений нет (1,0), база и оптимист — 1,1, оптимист строится на охвате и конверсии","base_outputs":{"payers":19.2,"check":422.7,"rev_payer":464.97,"ltv":305.258497,"cac":312.5,"contrib":-7.241503,"ltv_cac":0.976827,"static":13614.345355,"profit_month":-13753.382212,"be_month":null,"payback":null,"model_share":0.048488},"check_cases":[{"name":"база","inputs":{"reach":15000,"c_start":0.04,"c_activate":0.4,"c_pay":0.08,"p_day":99,"p_week":390,"p_month":990,"sh_day":0.3,"sh_week":0.5,"apc":1.1,"tok_in":5853,"tok_out":186,"p_in":0.045,"p_out":0.5,"or_fee":0.055,"usd":85,"lim_out":500,"calls_turn":1.5,"k_over":2,"free_msgs":10,"drop_share":0.3,"turns_day":10,"active_share":0.5,"flow_tg":23.0,"scale_city":100,"llm_share":1.0,"x_in":4531,"x_out":701,"hosting":1500,"support_h":8,"rate":1500,"acq":0.035,"tax":0.06,"admin_share":0.2,"cpm":1000,"ctr_ad":0.01,"paid_share":0.1,"dev_h":120,"label_h":20,"label_rate":500},"expected":{"payers":19.2,"check":422.7,"rev_payer":464.97,"ltv":305.258497,"cac":312.5,"contrib":-7.241503,"ltv_cac":0.976827,"static":13614.345355,"profit_month":-13753.382212,"be_month":null,"payback":null,"model_share":0.048488}},{"name":"пессимист","inputs":{"reach":8000,"c_start":0.02,"c_activate":0.3,"c_pay":0.05,"p_day":99,"p_week":390,"p_month":990,"sh_day":0.5,"sh_week":0.4,"apc":1.0,"tok_in":5853,"tok_out":186,"p_in":0.045,"p_out":0.5,"or_fee":0.055,"usd":85,"lim_out":500,"calls_turn":1.5,"k_over":2,"free_msgs":10,"drop_share":0.3,"turns_day":10,"active_share":0.5,"flow_tg":23.0,"scale_city":100,"llm_share":1.0,"x_in":4531,"x_out":701,"hosting":1500,"support_h":8,"rate":1500,"acq":0.035,"tax":0.06,"admin_share":0.2,"cpm":1500,"ctr_ad":0.005,"paid_share":0.3,"dev_h":120,"label_h":20,"label_rate":500},"expected":{"payers":2.4,"check":304.5,"rev_payer":304.5,"ltv":179.05439,"cac":6000.0,"contrib":-5820.94561,"ltv_cac":0.029842,"static":13614.345355,"profit_month":-27584.61482,"be_month":null,"payback":null,"model_share":0.116972}},{"name":"оптимист + Kimi K2.6","inputs":{"reach":30000,"c_start":0.08,"c_activate":0.5,"c_pay":0.12,"p_day":99,"p_week":390,"p_month":990,"sh_day":0.2,"sh_week":0.5,"apc":1.1,"tok_in":5853,"tok_out":186,"p_in":0.65,"p_out":3.41,"or_fee":0.055,"usd":85,"lim_out":500,"calls_turn":1.5,"k_over":2,"free_msgs":10,"drop_share":0.3,"turns_day":10,"active_share":0.5,"flow_tg":23.0,"scale_city":100,"llm_share":1.0,"x_in":4531,"x_out":701,"hosting":1500,"support_h":8,"rate":1500,"acq":0.035,"tax":0.06,"admin_share":0.2,"cpm":800,"ctr_ad":0.015,"paid_share":0.05,"dev_h":120,"label_h":20,"label_rate":500},"expected":{"payers":144.0,"check":511.8,"rev_payer":562.98,"ltv":184.127913,"cac":44.444444,"contrib":139.683468,"ltv_cac":4.142878,"static":14600.472589,"profit_month":5513.946854,"be_month":105,"payback":34.458076,"model_share":0.377941}}],"check_tolerance":"относительная 1e-6; null = «не окупается»"}</script>
+<script type="application/json" id="eval-data">{"available":true,"date":"2026-11-10","n":200,"layers":{"шаблон":151,"свободный":49},"weights":{"шаблон":0.902,"свободный":0.098},"n_offers":198,"full_price_share":0.07793743835423418,"routing_share":1.0,"routing_layers":{"шаблон":{"n":151,"llm":151},"свободный":{"n":49,"llm":49}},"llm_posts":null,"llm_status":null,"has_llm":true,"has_hybrid":true,"llm_run":{"model":"deepseek/deepseek-v4.1-flash","calls":200,"invalid_cards":13},"fields":[{"key":"price_rub","label":"Цена аренды","kind":"num","ceiling":0.9958,"regex":{"acc":0.9797,"rec":0.9796},"llm":{"acc":0.9719,"rec":0.9718},"hybrid":{"acc":0.994,"rec":0.994}},{"key":"utilities_status","label":"Коммуналка: статус","kind":"status","ceiling":0.2671,"regex":{"acc":0.9522,"rec":0.9105},"llm":{"acc":0.9421,"rec":0.9844},"hybrid":{"acc":0.9701,"rec":1.0}},{"key":"utilities_rub","label":"Коммуналка: сумма","kind":"num","ceiling":0.0836,"regex":{"acc":0.9881,"rec":0.8571},"llm":{"acc":1.0,"rec":1.0},"hybrid":{"acc":0.9881,"rec":0.8571}},{"key":"commission_status","label":"Комиссия: статус","kind":"status","ceiling":0.1616,"regex":{"acc":0.9881,"rec":0.9261},"llm":{"acc":0.948,"rec":0.8633},"hybrid":{"acc":0.9821,"rec":0.9261}},{"key":"deposit_status","label":"Залог: статус","kind":"status","ceiling":0.0956,"regex":{"acc":1.0,"rec":1.0},"llm":{"acc":0.966,"rec":1.0},"hybrid":{"acc":0.994,"rec":1.0}},{"key":"deal","label":"Срок: долгая или посуточно","kind":"status","ceiling":0.9127,"regex":{"acc":0.9755,"rec":0.9886},"llm":{"acc":0.966,"rec":0.9738},"hybrid":{"acc":0.994,"rec":1.0}},{"key":"move_from","label":"Дата заезда","kind":"acc","ceiling":null,"regex":{"acc":0.9672,"rec":null},"llm":{"acc":0.9493,"rec":null},"hybrid":{"acc":0.9672,"rec":null}},{"key":"metro","label":"Станция метро","kind":"acc","ceiling":null,"regex":{"acc":0.9979,"rec":null},"llm":{"acc":0.9761,"rec":null},"hybrid":{"acc":1.0,"rec":null}},{"key":"metro_walk_min","label":"Минут до метро","kind":"num","ceiling":0.0956,"regex":{"acc":0.9343,"rec":0.3125},"llm":{"acc":0.994,"rec":0.9375},"hybrid":{"acc":0.9343,"rec":0.3125}}],"second_annotator":"второй разметчик вслепую на 40 постах: цена, коммуналка (статус и сумма), комиссия, залог, метро — совпадение 100%, каппа 1,0; тип сделки — 97,5% (каппа 0,96)"}</script>
+<script type="application/json" id="kpi-data">{"n_points":140,"median_extra":6000.0,"share_over10":0.65,"median_extra_known":5636.0,"share_over10_known":0.55,"commission_share":0.5143,"no_sum_all":0.7577342657342658,"no_sum_by_source":{"Telegram":0.904,"Циан":0.157},"n_by_source":{"Telegram":575,"Циан":140},"n_all":715,"top10_dropped":2,"tau":0.89}</script>
+<script id="calc-core">
+(function (root) {
+  'use strict';
+  var FUNCS = {
+    CEILING: function (x, s) { return Math.ceil(x / s) * s; },
+    IF: function (c, a, b) { return c ? a : b; },
+    MAX: function (a, b) { return Math.max(a, b); },
+    MIN: function (a, b) { return Math.min(a, b); }
+  };
+  var FNAMES = ['CEILING', 'IF', 'MAX', 'MIN', 'NEVER'];
+  var FVALS = [FUNCS.CEILING, FUNCS.IF, FUNCS.MAX, FUNCS.MIN, Infinity];
+  // Компилирует формулы econ_model.json по порядку списка. Выражения проверяются белым списком символов
+  // и имён: допускаются только допущения, формулы выше по списку и функции CEILING / IF / MAX / MIN / NEVER.
+  function compile(econ) {
+    var known = econ.params.map(function (p) { return p.key; });
+    var steps = econ.formulas.map(function (f) {
+      var expr = String(f.expr);
+      if (!/^[A-Za-z0-9_\s.+\-*\/(),<>=!?:&|]+$/.test(expr)) throw new Error('недопустимые символы: ' + f.key);
+      var ids = expr.replace(/\b\d+(\.\d+)?(e[+-]?\d+)?\b/gi, ' ').match(/[A-Za-z_][A-Za-z0-9_]*/g) || [];
+      ids.forEach(function (id) {
+        if (known.indexOf(id) < 0 && FNAMES.indexOf(id) < 0) throw new Error('неизвестное имя ' + id + ' в ' + f.key);
+      });
+      var args = known.slice();
+      // без "use strict": в модели есть ключ static — в строгом режиме это зарезервированное слово
+      var fn = new Function(args.concat(FNAMES).join(','), 'return (' + expr + ');');
+      known.push(f.key);
+      return { key: f.key, args: args, fn: fn };
+    });
+    return function compute(inputs) {
+      var v = {};
+      econ.params.forEach(function (p) {
+        var x = inputs && inputs[p.key];
+        v[p.key] = (x === undefined || x === null || x === '') ? p.base : +x;
+      });
+      steps.forEach(function (s) {
+        var a = s.args.map(function (k) { return v[k]; });
+        v[s.key] = s.fn.apply(null, a.concat(FVALS));
+      });
+      return v;
+    };
+  }
+  root.RentCalc = { compile: compile, FUNCS: FUNCS };
+})(typeof window !== 'undefined' ? window : globalThis);
+</script>
+<script>
+(function () {
+'use strict';
+var D = JSON.parse(document.getElementById('dash-data').textContent);
+var E = JSON.parse(document.getElementById('econ-data').textContent);
+var V = JSON.parse(document.getElementById('eval-data').textContent);
+var K = JSON.parse(document.getElementById('kpi-data').textContent);
+var NS = 'http://www.w3.org/2000/svg';
+function $(s) { return document.querySelector(s); }
+function S(tag, attrs, parent) {
+  var e = document.createElementNS(NS, tag);
+  if (attrs) for (var k in attrs) if (attrs[k] !== undefined && attrs[k] !== null) e.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(e);
+  return e;
+}
+function T(parent, x, y, text, attrs) {
+  var t = S('text', Object.assign({ x: x, y: y }, attrs || {}), parent); t.textContent = text; return t;
+}
+function H(tag, attrs, parent, text) {
+  var e = document.createElement(tag);
+  if (attrs) for (var k in attrs) { if (k === 'class') e.className = attrs[k]; else if (attrs[k] != null) e.setAttribute(k, attrs[k]); }
+  if (text != null) e.textContent = text;
+  if (parent) parent.appendChild(e);
+  return e;
+}
+// ---------- числа по-русски ----------
+function num(x, d) {
+  d = d || 0;
+  if (x === null || x === undefined || !isFinite(x)) return '—';
+  var neg = x < 0 && Math.abs(x) >= 0.5 * Math.pow(10, -d);
+  var s = Math.abs(x).toFixed(d).split('.');
+  var i = s[0].replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+  return (neg ? '−' : '') + i + (s[1] ? ',' + s[1] : '');
+}
+function pct(x, d) { return (x === null || x === undefined || !isFinite(x)) ? '—' : num(x * 100, d || 0) + '%'; }
+function rub(x) { return num(x) + ' ₽'; }
+function decimals(step) {
+  var s = String(step); if (s.indexOf('e-') > 0) return +s.split('e-')[1];
+  var p = s.split('.')[1]; return p ? Math.min(p.length, 4) : 0;
+}
+// ---------- подсказка ----------
+var tip = H('div', { id: 'tip', role: 'tooltip' }, document.body); tip.hidden = true;
+function placeTip(ev) {
+  var pad = 14, w = tip.offsetWidth, h = tip.offsetHeight;
+  var x = ev.clientX + pad, y = ev.clientY + pad;
+  if (x + w > innerWidth - 8) x = ev.clientX - w - pad;
+  if (x < 8) x = 8;
+  if (y + h > innerHeight - 8) y = ev.clientY - h - pad;
+  if (y < 8) y = 8;
+  tip.style.left = x + 'px'; tip.style.top = y + 'px';
+}
+function tipShow(ev, title, rows) {
+  tip.replaceChildren();
+  if (title) H('div', { class: 'tt-title' }, tip, title);
+  rows.forEach(function (r) {
+    var row = H('div', { class: 'tt-row' }, tip);
+    if (r.c) { var k = H('span', { class: 'tt-key' }, row); k.style.background = 'var(' + r.c + ')'; }
+    H('strong', null, row, r.v);
+    if (r.l) H('span', { class: 'tt-lab' }, row, r.l);
+  });
+  tip.hidden = false; placeTip(ev);
+}
+function tipHide() { tip.hidden = true; }
+document.addEventListener('pointerdown', tipHide);
+window.addEventListener('scroll', tipHide, { passive: true });
+function bindTip(node, getContent, hotNode) {
+  var hn = hotNode || node;
+  function show(ev) { var c = getContent(); tipShow(ev, c.title, c.rows); hn.classList.add('hot'); }
+  node.addEventListener('pointerenter', show);
+  node.addEventListener('pointermove', function (ev) { if (!tip.hidden) placeTip(ev); });
+  node.addEventListener('pointerleave', function (ev) { if (ev.pointerType !== 'touch') { tipHide(); } hn.classList.remove('hot'); });
+  node.addEventListener('pointerdown', function (ev) { show(ev); ev.stopPropagation(); });
+  node.addEventListener('focus', function () { var r = node.getBoundingClientRect(); show({ clientX: r.left + r.width / 2, clientY: r.top + 4 }); });
+  node.addEventListener('blur', function () { tipHide(); hn.classList.remove('hot'); });
+}
+function table(host, head, rows, numCols) {
+  host.replaceChildren();
+  var t = H('table', { class: 't' }, host), tr = H('tr', null, H('thead', null, t));
+  head.forEach(function (h, i) { H('th', { class: numCols && numCols.indexOf(i) >= 0 ? 'n' : null }, tr, h); });
+  var tb = H('tbody', null, t);
+  rows.forEach(function (r) {
+    var row = H('tr', null, tb);
+    r.forEach(function (c, i) { H('td', { class: numCols && numCols.indexOf(i) >= 0 ? 'n' : null }, row, c); });
+  });
+  return t;
+}
+function swatch(parent, kind, cls) {
+  var s = S('svg', { width: kind === 'line' ? 18 : 12, height: 12, viewBox: kind === 'line' ? '0 0 18 12' : '0 0 12 12', 'aria-hidden': 'true' }, parent);
+  if (kind === 'line') S('line', { x1: 1, y1: 6, x2: 17, y2: 6, class: cls, 'stroke-width': 2, 'stroke-linecap': 'round' }, s);
+  else if (kind === 'circle') S('circle', { cx: 6, cy: 6, r: 4.5, class: cls }, s);
+  else if (kind === 'diamond') S('path', { d: 'M6 0.8 L11.2 6 L6 11.2 L0.8 6 Z', class: cls }, s);
+  else if (kind === 'square') S('rect', { x: 1.5, y: 1.5, width: 9, height: 9, rx: 1.5, class: cls }, s);
+  else S('rect', { x: 0, y: 1, width: 12, height: 10, rx: 2, class: cls }, s);
+  return s;
+}
+function legend(host, items) {
+  host.replaceChildren();
+  items.forEach(function (it) { var sp = H('span', { class: 'it' }, host); swatch(sp, it.kind, it.cls); H('span', null, sp, it.label); });
+}
+// ---------- шапка ----------
+function renderKpis() {
+  var host = $('#kpis'), f = D.factoid_1k, h = D.hero_apartment;
+  var utilUp = f.util_median && f.price_median ? f.util_median / f.price_median : null;
+  var tiles = [
+    { v: rub(f.price_median), l: 'медианная цена 1-комнатной в объявлении', s: '+ коммуналка ' + rub(f.util_median) + ' = ' + rub(f.price_median + f.util_median) + ' на деле (+' + pct(utilUp) + ')' },
+    { v: pct(K.no_sum_all), l: 'объявлений не называют сумму коммуналки', s: 'Telegram ' + pct(K.no_sum_by_source['Telegram']) + ', Циан ' + pct(K.no_sum_by_source['Циан']) },
+    { v: '50 из 100', l: 'баллов получает место, выбранное единственным кроме метро, если до него ≤ 5 мин', s: 'столько же весит метро: место не отсеивает квартиры, а поднимает их в списке (глава 2)' }
+  ];
+  tiles.forEach(function (t) {
+    var d = H('div', { class: 'tile' }, host);
+    H('div', { class: 'lab' }, d, t.l); H('div', { class: 'val' }, d, t.v); H('div', { class: 'sub' }, d, t.s);
+  });
+  var near = h.metro ? 'метро ' + h.metro : 'метро';
+  $('#hero-story').textContent = 'Самая удачная находка в наборе — ' + (h.fmt === 'студия' ? 'студия' : h.fmt) + ', ' +
+    num(h.area, 0) + ' м² (' + h.source + '): ' + num(h.metro_min) + ' мин до ' + near + ' и ' + num(h.driver_min) +
+    ' мин до места «' + h.driver_label + '» — балл близости ' + h.score + ' из 100, полная цена ≈ ' + rub(h.price_est) +
+    ' в месяц. Ни одно из этих двух удобств само объявление не называет — их видно только по карте.';
+  var views = 10, minPer = 5, saved = views * minPer;
+  $('#time-note').textContent = 'Чтобы вручную уточнить коммуналку и посчитать минуты до нужных мест у ' + views +
+    ' объявлений, нужно примерно по ' + minPer + ' минут на каждое — около ' + saved + ' минут на один подбор квартиры. ' +
+    'Дальше — что ещё в этих данных нашлось.';
+}
+
+// ---------- 2. точечный график ----------
+var BASIS = [
+  { k: 'известно', cls: 'f1', st: 'st1', c: '--s1', shape: 'circle', label: 'полная цена известна' },
+  { k: 'оценка коммуналки', cls: 'f2', st: 'st2', c: '--s2', shape: 'diamond', label: 'коммуналка не указана — оценка' },
+  { k: 'оценка: счётчики', cls: 'f3', st: 'st3', c: '--s3', shape: 'square', label: '«счётчики сверху» — оценка' }
+];
+function marker(g, shape, x, y, r, cls) {
+  if (shape === 'circle') return S('circle', { cx: x, cy: y, r: r, class: cls + ' ring' }, g);
+  if (shape === 'diamond') return S('path', { d: 'M' + x + ' ' + (y - r - 1) + 'L' + (x + r + 1) + ' ' + y + 'L' + x + ' ' + (y + r + 1) + 'L' + (x - r - 1) + ' ' + y + 'Z', class: cls + ' ring' }, g);
+  return S('rect', { x: x - r, y: y - r, width: 2 * r, height: 2 * r, rx: 1.5, class: cls + ' ring' }, g);
+}
+var SCATTER_LIMIT = 40;   // полный список виден только мелко: показываем худшие случаи крупно, остальное — в таблице
+function renderScatter() {
+  var host = $('#scatter-chart'); host.replaceChildren();
+  var all = D.price_vs_full.points.slice().sort(function (a, b) { return (b.est - b.price) - (a.est - a.price); });
+  var P = all.slice(0, SCATTER_LIMIT);
+  var W = host.clientWidth, narrow = W < 560;
+  var rowH = narrow ? 30 : 24, m = { l: 6, r: 6, t: 24, b: 6 };
+  var Hh = m.t + P.length * rowH + m.b;
+  var lo = Math.min.apply(null, all.map(function (p) { return p.price; })) * 0.92;
+  var hi = Math.max.apply(null, all.map(function (p) { return p.hi; })) * 1.05;
+  var L0 = Math.log(lo), L1 = Math.log(hi), pw = W - m.l - m.r;
+  function sx(v) { return m.l + (Math.log(v) - L0) / (L1 - L0) * pw; }
+  var svg = S('svg', { viewBox: '0 0 ' + W + ' ' + Hh, height: Hh }, host);
+  host.setAttribute('aria-label', 'Дамбелл-диаграмма: цена из объявления и полная цена в месяц, ' + P.length +
+    ' объявлений с самой большой доплатой из ' + all.length + ' (Циан)');
+  var ticks = (narrow ? [30000, 50000, 100000, 150000] : [25000, 30000, 40000, 50000, 70000, 100000, 150000]).filter(function (t) { return t >= lo && t <= hi; });
+  ticks.forEach(function (t) {
+    S('line', { x1: sx(t), x2: sx(t), y1: 16, y2: Hh, class: 'gl' }, svg);
+    T(svg, sx(t), 13, num(t / 1000) + ' тыс. ₽', { class: 'ax', 'text-anchor': 'middle' });
+  });
+  P.forEach(function (p, i) {
+    var y = m.t + i * rowH + rowH / 2;
+    var b = BASIS.filter(function (x) { return x.k === p.basis; })[0] || BASIS[0];
+    var x0 = sx(p.price), x1 = sx(p.est);
+    var row = S('g', { tabindex: 0, role: 'listitem' }, svg);
+    if (p.hi > p.lo) S('line', { x1: sx(p.lo), x2: sx(p.hi), y1: y, y2: y, class: b.st, 'stroke-width': 2, opacity: 0.4 }, row);
+    S('line', { x1: x0, x2: x1, y1: y, y2: y, stroke: 'var(--ink2)', 'stroke-width': 1.6 }, row);
+    S('circle', { cx: x0, cy: y, r: 3.5, fill: 'var(--muted)' }, row);
+    marker(row, b.shape, x1, y, 5, b.cls);
+    S('rect', { x: 0, y: y - rowH / 2, width: W, height: rowH, class: 'row-hit' }, row);
+    bindTip(row, function () {
+      var extra = p.est - p.price;
+      var desc = p.fmt + ', ' + num(p.area, 0) + ' м²' + (p.floor ? ', ' + p.floor + '/' + (p.floors || '?') + ' эт.' : '') +
+        (p.metro ? ', у метро ' + p.metro : '') + (p.metro_min != null ? ' (' + num(p.metro_min) + ' мин)' : '');
+      var rows = [{ v: rub(p.price), l: 'цена в объявлении' },
+        { v: (p.hi > p.lo ? '≈ ' : '') + rub(p.est), l: 'полная цена в месяц', c: b.c }];
+      if (p.hi > p.lo) rows.push({ v: rub(p.lo) + ' – ' + rub(p.hi), l: 'разброс оценки' });
+      rows.push({ v: '+' + rub(extra) + ' (' + pct(extra / p.price, 1) + ')', l: 'доплата' });
+      rows.push({ v: p.util_status, l: 'коммуналка' });
+      if (p.commission) rows.push({ v: rub(p.commission), l: 'комиссия' });
+      return { title: desc, rows: rows };
+    });
+  });
+}
+function scatterStatic() {
+  var P = D.price_vs_full.points;
+  $('#scatter-sub').textContent = 'Серая точка — цена в объявлении, цветная — сколько на самом деле придётся платить в месяц; ' +
+    'показаны ' + SCATTER_LIMIT + ' объявлений с самой большой доплатой из ' + num(P.length) + ' (Циан), остальные — в таблице ниже. ' +
+    'Медианная доплата по всем — ' + rub(K.median_extra) + ' в месяц; у ' + pct(K.share_over10) + ' объявлений полная цена выше указанной больше чем на 10%.';
+  legend($('#scatter-legend'), BASIS.map(function (b) {
+    return { kind: b.shape, cls: b.cls, label: b.label + ' · ' + P.filter(function (p) { return p.basis === b.k; }).length };
+  }));
+  $('#top10-callout').textContent = 'Честно о порядке: если отсортировать те же объявления по полной цене вместо цены в объявлении, ' +
+    'из первой десятки выпадают только ' + K.top10_dropped + ' из 10, тау Кендалла ' + num(K.tau, 2) + '. Порядок почти не меняется — ' +
+    'боль не в том, кто дешевле, а в сюрпризе доплаты, которую узнаёшь только на просмотре.';
+  function med(a) { a = a.slice().sort(function (x, y) { return x - y; }); var n = a.length; return n ? (n % 2 ? a[(n - 1) / 2] : (a[n / 2 - 1] + a[n / 2]) / 2) : NaN; }
+  var groups = BASIS.map(function (b) { return { label: b.label, P: P.filter(function (p) { return p.basis === b.k; }) }; });
+  groups.push({ label: 'все', P: P });
+  table($('#scatter-table'), ['Основа полной цены', 'Объявлений', 'Медиана цены', 'Медиана полной', 'Медиана доплаты', 'Доплата > 10%'],
+    groups.map(function (g) {
+      return [g.label, num(g.P.length), rub(med(g.P.map(function (p) { return p.price; }))), rub(med(g.P.map(function (p) { return p.est; }))),
+        rub(med(g.P.map(function (p) { return p.est - p.price; }))), pct(g.P.filter(function (p) { return (p.est - p.price) / p.price > 0.1; }).length / g.P.length)];
+    }), [1, 2, 3, 4, 5]);
+  var full = P.slice().sort(function (a, b) { return (b.est - b.price) - (a.est - a.price); });
+  table($('#scatter-table-full'), ['Формат', 'м²', 'Цена', 'Полная цена', 'Доплата', 'Доплата, %', 'Коммуналка'],
+    full.map(function (p) {
+      return [p.fmt, num(p.area, 0), rub(p.price), rub(p.est), rub(p.est - p.price), pct((p.est - p.price) / p.price, 1), p.util_status];
+    }), [1, 2, 3, 4, 5]);
+}
+
+// ---------- 3. драйверы интереса (дамбелл: 0 -> медиана баллов у квартир рядом) ----------
+var iceMode = 'all';
+function drvRows() {
+  return D.drivers_score.filter(function (r) {
+    return !/^каток/.test(r.label) || (iceMode === 'named') === /с названием/.test(r.label);
+  }).slice().sort(function (a, b) { return b.median_points - a.median_points; });
+}
+function renderDrivers() {
+  var host = $('#drv-chart'); host.replaceChildren();
+  var rows = drvRows(), W = host.clientWidth, narrow = W < 520;
+  var labW = narrow ? 0 : Math.min(170, W * 0.34), rowH = narrow ? 46 : 32, top = 6, bottom = 20;
+  var Hh = top + rows.length * rowH + bottom;
+  var x0 = labW + 4, pw = W - x0 - 46, M = 50;
+  function sx(v) { return x0 + v / M * pw; }
+  var svg = S('svg', { viewBox: '0 0 ' + W + ' ' + Hh, height: Hh }, host);
+  host.setAttribute('aria-label', 'Дамбелл: баллы близости по драйверам интереса, шкала 0–50');
+  [0, 10, 20, 30, 40, 50].forEach(function (t) {
+    S('line', { x1: sx(t), x2: sx(t), y1: top, y2: Hh - bottom, class: t === 0 ? 'bl' : 'gl' }, svg);
+    T(svg, sx(t), Hh - 6, num(t), { class: 'ax', 'text-anchor': 'middle' });
+  });
+  rows.forEach(function (r, i) {
+    var y = top + i * rowH, by = narrow ? y + 24 : y + rowH / 2 - 4;
+    if (narrow) T(svg, 0, y + 14, r.label, { class: 'lab' });
+    else T(svg, labW, by + 4, r.label, { class: 'lab', 'text-anchor': 'end' });
+    var g = S('g', { tabindex: 0, role: 'listitem' }, svg);
+    S('line', { x1: sx(0), x2: sx(r.median_points), y1: by, y2: by, stroke: 'var(--ink2)', 'stroke-width': 1.5 }, g);
+    S('circle', { cx: sx(0), cy: by, r: 3.5, fill: 'var(--muted)' }, g);
+    S('circle', { cx: sx(r.median_points), cy: by, r: 5, class: 'f1 ring' }, g);
+    T(g, sx(r.median_points) + 9, by + 4, num(r.median_points, 0), { class: 'valt' });
+    S('rect', { x: 0, y: y, width: W, height: rowH - 2, class: 'row-hit' }, g);
+    bindTip(g, function () {
+      return {
+        title: r.label, rows: [
+          { v: num(r.median_points, 1), l: 'медиана баллов у квартир, которые рядом (≤ 15 мин)' },
+          { v: pct(r.share_near15 / 100, 0), l: 'квартир с точным адресом рядом с этим местом' }
+        ]
+      };
+    });
+  });
+  table($('#drv-table'), ['Место', 'Рядом (≤ 15 мин)', 'Медиана баллов у тех, что рядом'],
+    rows.map(function (r) { return [r.label, pct(r.share_near15 / 100, 0), num(r.median_points, 1)]; }), [1, 2]);
+}
+function drvStatic() {
+  $('#drv-sub').textContent = 'В продукте драйверы — веса для порядка выдачи, а не фильтры: место, выбранное единственным кроме ' +
+    'метро, весит 0,5 (как метро) и поднимает квартиру в списке, не убирая остальные. Два конца линии — 0 (в объявлении ' +
+    'это место никак не названо) и медиана баллов среди квартир, которые и правда рядом.';
+}
+function bindIce() {
+  $('#ice-seg').addEventListener('click', function (ev) {
+    var b = ev.target.closest('button'); if (!b) return;
+    iceMode = b.dataset.v;
+    $('#ice-seg').querySelectorAll('button').forEach(function (x) { x.setAttribute('aria-pressed', String(x === b)); });
+    renderDrivers();
+  });
+  var ice = D.drivers_score.filter(function (r) { return /^каток/.test(r.label); });
+  $('#ice-seg').querySelectorAll('button').forEach(function (b) {
+    var r = ice.filter(function (x) { return (b.dataset.v === 'named') === /с названием/.test(x.label); })[0];
+    if (r) b.textContent += ' · ' + pct(r.share_near15 / 100, 0);
+  });
+}
+
+// ---------- 5. поток ----------
+var FLOW = [
+  { k: 'метро + фитнес', cls: 'st1', c: '--s1', label: 'метро + фитнес' },
+  { k: 'метро + садик + поликлиника', cls: 'st2', c: '--s2', label: 'метро + садик + поликлиника' },
+  { k: 'метро + каток с названием', cls: 'st3', c: '--s3', label: 'метро + каток с названием' }
+];
+var MON = ['янв', 'фев', 'мар', 'апр', 'май', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек'];
+function monLabel(s, full) { var p = s.split('-'); return MON[+p[1] - 1] + (full ? ' ' + p[0] : ''); }
+function flowStatic() {
+  if (!$('#s-flow')) return;    // «Сколько подходящих объявлений в месяц» скрыта до экспериментального прогона
+  var F = D.flow, sm = F.summary, keys = Object.keys(sm);
+  var med = sm[keys.find(function (k) { return /медиана/.test(k); })] || {};
+  var mx = sm[keys.find(function (k) { return /больше/.test(k); })] || {};
+  $('#flow-sub').textContent = 'Telegram-канал по всему городу, долгая аренда квартир. В медианный месяц — ' + num(med['все']) +
+    ' объявлений, из них с точкой на доме ' + num(med['точка по дому']) + '. Под узкий профиль подходит единицы: метро + фитнес — ' +
+    num(med['метро + фитнес']) + ', метро + садик + поликлиника — ' + num(med['метро + садик + поликлиника']) +
+    ', метро + каток с названием — ' + num(med['метро + каток с названием']) + ' (максимум ' + num(mx['метро + каток с названием']) + ' за месяц).';
+  var cian = keys.find(function (k) { return /Циан.*30 дней/.test(k); });
+  $('#flow-note').textContent = 'Профили: каждое место ≤ 15 минут пешком, только объявления с точкой на доме. ' +
+    (cian ? 'Циан — не поток, а один срез в одном районе: за 30 дней до сбора там опубликовано ' + num(sm[cian]['все']) +
+      ' студий и 1-к. Поэтому для экономики поток канала умножается на масштаб города (ползунок в калькуляторе).' : '');
+  legend($('#flow-legend'), [{ kind: 'rect', cls: 'fgb', label: 'все объявления: с точкой на доме' }, { kind: 'rect', cls: 'fgt', label: 'остальные' }]
+    .concat(FLOW.map(function (f) { return { kind: 'line', cls: f.cls, label: f.label }; })));
+  var head = ['Месяц', 'Все', 'С точкой на доме'].concat(FLOW.map(function (f) { return f.label; }));
+  table($('#flow-table'), head, F.months.map(function (mo, i) {
+    return [monLabel(mo, true), num(F.by_month['все'][i]), num(F.by_month['точка по дому'][i])].concat(FLOW.map(function (f) { return num(F.by_month[f.k][i]); }));
+  }), [1, 2, 3, 4, 5]);
+}
+function renderFlow() {
+  var host = $('#flow-chart'); if (!host) return;
+  host.replaceChildren();
+  var F = D.flow, n = F.months.length, W = host.clientWidth, narrow = W < 560;
+  var Hh = narrow ? 260 : 300, m = { l: 34, r: 8, t: 10, b: 32 };
+  var pw = W - m.l - m.r, ph = Hh - m.t - m.b, all = F.by_month['все'], prec = F.by_month['точка по дому'];
+  var ymax = Math.ceil(Math.max.apply(null, all) / 10) * 10;
+  var band = pw / n, bwid = Math.min(24, band * 0.68);
+  function cx(i) { return m.l + band * (i + 0.5); }
+  function sy(v) { return m.t + ph - v / ymax * ph; }
+  var svg = S('svg', { viewBox: '0 0 ' + W + ' ' + Hh, height: Hh }, host);
+  host.setAttribute('aria-label', 'Объявления Telegram по месяцам и подходящие под три профиля');
+  for (var t = 0; t <= ymax; t += 10) {
+    S('line', { x1: m.l, x2: m.l + pw, y1: sy(t), y2: sy(t), class: t ? 'gl' : 'bl' }, svg);
+    T(svg, m.l - 6, sy(t) + 4, num(t), { class: 'ax', 'text-anchor': 'end' });
+  }
+  var every = narrow ? 6 : 3;
+  F.months.forEach(function (mo, i) {
+    if (i % every === 0) T(svg, cx(i), Hh - 12, monLabel(mo, false) + ' ' + mo.slice(2, 4), { class: 'ax', 'text-anchor': 'middle' });
+    var x = cx(i) - bwid / 2, yb = sy(prec[i]), yt = sy(all[i]);
+    S('path', { d: 'M' + x + ',' + sy(0) + 'V' + yb + 'H' + (x + bwid) + 'V' + sy(0) + 'Z', class: 'fgb' }, svg);
+    if (all[i] > prec[i] && yb - yt > 2.5) {
+      var h = yb - 2 - yt, r = Math.min(4, h / 2, bwid / 2);
+      S('path', { d: 'M' + x + ',' + (yb - 2) + 'V' + (yt + r) + 'a' + r + ',' + r + ' 0 0 1 ' + r + ',' + (-r) + 'H' + (x + bwid - r) +
+        'a' + r + ',' + r + ' 0 0 1 ' + r + ',' + r + 'V' + (yb - 2) + 'Z', class: 'fgt' }, svg);
+    }
+  });
+  FLOW.forEach(function (f) {
+    var d = F.by_month[f.k].map(function (v, i) { return (i ? 'L' : 'M') + cx(i) + ',' + sy(v); }).join('');
+    S('path', { d: d, fill: 'none', class: f.cls, 'stroke-width': 2, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' }, svg);
+    var last = F.by_month[f.k][n - 1];
+    S('circle', { cx: cx(n - 1), cy: sy(last), r: 4, class: f.cls.replace('st', 'f') + ' ring' }, svg);
+  });
+  var cross = S('line', { y1: m.t, y2: m.t + ph, stroke: 'var(--muted)', 'stroke-width': 1, visibility: 'hidden' }, svg);
+  var hit = S('rect', { x: m.l, y: m.t, width: pw, height: ph, fill: 'transparent' }, svg);
+  function move(ev) {
+    var r = svg.getBoundingClientRect(), k = W / r.width, mx = (ev.clientX - r.left) * k;
+    var i = Math.max(0, Math.min(n - 1, Math.floor((mx - m.l) / band)));
+    cross.setAttribute('x1', cx(i)); cross.setAttribute('x2', cx(i)); cross.setAttribute('visibility', 'visible');
+    tipShow(ev, monLabel(F.months[i], true), [{ v: num(all[i]), l: 'все объявления' }, { v: num(prec[i]), l: 'с точкой на доме' }]
+      .concat(FLOW.map(function (f) { return { v: num(F.by_month[f.k][i]), l: f.label, c: f.c }; })));
+  }
+  hit.addEventListener('pointermove', move);
+  hit.addEventListener('pointerdown', function (ev) { move(ev); ev.stopPropagation(); });
+  hit.addEventListener('pointerleave', function (ev) { if (ev.pointerType !== 'touch') { tipHide(); cross.setAttribute('visibility', 'hidden'); } });
+}
+
+// ---------- 6. разбор полей ----------
+function renderExtract() {
+  var host = $('#ext'); host.replaceChildren();
+  if (!V.available) {
+    $('#ext-sub').textContent = 'Метрики разбора ещё не собраны: ждёт прогона на размеченном эталоне.';
+    return;
+  }
+  var w = V.weights || {}, layers = V.layers || {}, lk = Object.keys(layers);
+  $('#ext-sub').textContent = 'Эталон: ' + num(V.n) + ' постов Telegram, размеченных вручную (' +
+    lk.map(function (k) { return k + ' — ' + layers[k]; }).join(', ') + '); метрики взвешены по долям пула (' +
+    lk.map(function (k) { return k + ' ' + pct(w[k]); }).join(', ') + '). Точность — доля объявлений, где поле совпало с эталоном, ' +
+    'включая случаи «в тексте этого нет». Полнота — сколько найдено там, где поле есть. Потолок — в какой доле постов поле вообще есть: ' +
+    'больше этого не извлечёт ни одна модель.';
+  legend($('#ext-legend'), [{ kind: 'rect', cls: 'f1', label: 'регулярки' }, { kind: 'rect', cls: 'f2', label: 'LLM' },
+    { kind: 'rect', cls: 'f3', label: 'гибрид' }, { kind: 'rect', cls: 'fgb', label: 'потолок: поле есть в посте' }]);
+  ['Поле', 'Регулярки', 'LLM / гибрид', 'Потолок'].forEach(function (h) { H('div', { class: 'h' }, host, h); });
+  var waitTxt = 'ждёт прогона';
+  function meterCell(lab, m, color) {
+    var c = H('div', { 'data-l': lab }, host);
+    if (!m || m.acc == null) { H('div', { class: 'wait' }, c, '—'); return c; }
+    H('span', { class: 'mv' }, c, pct(m.acc, 1));
+    var mt = H('div', { class: 'meter' }, c), sp = H('span', null, mt); sp.style.width = (m.acc * 100) + '%'; sp.style.background = 'var(' + color + ')';
+    if (m.rec != null) H('div', { class: 'ms' }, c, 'полнота ' + pct(m.rec, 1));
+    return c;
+  }
+  V.fields.forEach(function (f) {
+    H('div', { class: 'f' }, host, f.label);
+    meterCell('Регулярки', f.regex, '--s1');
+    var c = H('div', { 'data-l': 'LLM / гибрид' }, host);
+    var any = false;
+    [['LLM', f.llm, '--s2'], ['гибрид', f.hybrid, '--s3']].forEach(function (x) {
+      if (!x[1] || x[1].acc == null) return; any = true;
+      var d = H('div', null, c); H('span', { class: 'mv' }, d, x[0] + ' ' + pct(x[1].acc, 1));
+      var mt = H('div', { class: 'meter' }, d), sp = H('span', null, mt); sp.style.width = (x[1].acc * 100) + '%'; sp.style.background = 'var(' + x[2] + ')';
+      if (x[1].rec != null) H('div', { class: 'ms' }, d, 'полнота ' + pct(x[1].rec, 1));
+    });
+    if (!any) H('div', { class: 'wait' }, c, waitTxt);
+    var cc = H('div', { 'data-l': 'Потолок' }, host);
+    if (f.ceiling == null) H('div', { class: 'wait' }, cc, '—');
+    else {
+      H('span', { class: 'mv' }, cc, pct(f.ceiling, f.ceiling < 0.1 ? 1 : 0));
+      var mt = H('div', { class: 'meter' }, cc), sp = H('span', null, mt); sp.style.width = (f.ceiling * 100) + '%'; sp.style.background = 'var(--g-bot)';
+      H('div', { class: 'ms' }, cc, 'постов, где поле есть');
+    }
+  });
+  var bits = [];
+  if (V.routing_share != null) {
+    var rl = V.routing_layers || {};
+    var rls = Object.keys(rl).map(function (k) { return k + ' ' + rl[k].llm + ' из ' + rl[k].n; }).join(', ');
+    bits.push(V.routing_share >= 0.999
+      ? 'Гибрид работает по полям: по каждой группе полей регулярки пусты у большинства постов, а один вызов разбирает пост целиком, поэтому в модель уходят все посты — ' + pct(V.routing_share) + ' (' + rls + '); экономии на доле постов нет.'
+      : 'Архитектура — гибрид: регулярки разбирают шаблонные посты, в LLM уходят свободный текст и посты, не прошедшие проверку, — ' + pct(V.routing_share) + ' пула (' + rls + ').');
+  }
+  if (!V.has_llm && !V.has_hybrid) bits.push('Метрики LLM и гибрида появятся после прогона модели' + (V.llm_posts ? ' на ' + V.llm_posts + ' постах эталона, которые гибрид отправляет в LLM' : '') + '.');
+  if (V.llm_run && V.llm_run.model) bits.push('Прогон: ' + V.llm_run.model + ', вызовов ' + V.llm_run.calls + ', невалидных карточек ' + V.llm_run.invalid_cards + '.');
+  bits.push('Потолок для даты заезда и станции не считался («—»).');
+  if (V.full_price_share != null) bits.push('Полную цену по самому посту можно посчитать лишь у ' + pct(V.full_price_share, 1) + ' объявлений эталона — остальное оценка.');
+  bits.push('Проверка эталона: ' + V.second_annotator + '.');
+  $('#ext-note').textContent = bits.join(' ');
+}
+
+// ---------- 7. калькулятор ----------
+var compute = window.RentCalc.compile(E);
+var PARAM = {}; E.params.forEach(function (p) { PARAM[p.key] = p; });
+var FORM = {}; E.formulas.forEach(function (f) { FORM[f.key] = f; });
+var SLIDERS = E.params.filter(function (p) { return p.slider; });
+var GROUP_NAMES = { 1: 'Воронка в месяц', 2: 'Тарифы и доход с платящего', 3: 'Модель и курс', 4: 'Сообщения в диалоге',
+  5: 'Разбор объявлений (гибрид)', 6: 'Постоянные затраты', 7: 'Доли от выручки', 8: 'Привлечение', 9: 'Разработка (разово)' };
+var GROUP_ORDER = [1, 4, 2, 3, 5, 6, 7, 8, 9];
+function baseState() { var s = {}; E.params.forEach(function (p) { s[p.key] = p.base; }); return s; }
+var st = baseState();
+var BASE_OUT = compute(baseState());
+function clampP(p, v) { return Math.min(p.max, Math.max(p.min, v)); }
+function fixShares(s, changed) { // доля «месяц» = 1 − день − неделя не может быть меньше нуля
+  if (s.sh_day + s.sh_week > 1 + 1e-12) {
+    if (changed === 'sh_week') s.sh_day = Math.max(0, 1 - s.sh_week); else s.sh_week = Math.max(0, 1 - s.sh_day);
+  }
+  return s;
+}
+function evalWith(base, key, val) { var s = Object.assign({}, base); s[key] = val; fixShares(s, key); return compute(s); }
+function trimZ(s) { return s.replace(/,(\d*?)0+$/, function (m, a) { return a ? ',' + a : ''; }); }
+function fmtP(p, v, extra) {
+  var d = Math.min(decimals(p.step), p.unit === '$' || p.unit === 'доля' ? 4 : 1) + (extra || 0);
+  if (p.unit === 'доля') return trimZ(num(v * 100, Math.max(0, d - 2))) + '%';
+  if (p.unit === '₽') return trimZ(num(v, d)) + ' ₽';
+  if (p.unit === '$') return '$' + num(v, Math.max(d, 2));
+  if (p.unit === '×') return '×' + trimZ(num(v, d));
+  return trimZ(num(v, d)) + ' ' + p.unit;
+}
+function short(label) { return label.replace(/\s*\(.*?\)\s*/g, ' ').trim(); }
+var inputs = {};
+function buildParams() {
+  var host = $('#params'); host.replaceChildren();
+  var byG = {};
+  SLIDERS.forEach(function (p) { var g = parseInt(p.group, 10) || 0; (byG[g] = byG[g] || []).push(p); });
+  GROUP_ORDER.concat(Object.keys(byG).map(Number).filter(function (g) { return GROUP_ORDER.indexOf(g) < 0; })).forEach(function (g, gi) {
+    var list = byG[g]; if (!list) return;
+    var det = H('details', { class: 'grp' }, host); if (gi < 3) det.open = true;
+    H('summary', null, det, GROUP_NAMES[g] || list[0].group.replace(/^\d+\.\s*/, ''));
+    var body = H('div', { class: 'grp-body' }, det);
+    if (g === 3) H('div', { class: 'derived' }, body, 'Модель, цены токенов и курс доллара выбираются над плитками. ' +
+      'Цены — каталог OpenRouter, ' + (E.models[0].catalog || '').replace(/^каталог\s*/, '') + '; комиссия OpenRouter при пополнении учтена в формуле.');
+    list.forEach(function (p) {
+      if (g === 3 && (p.key === 'p_in' || p.key === 'p_out' || p.key === 'usd')) return;
+      var row = H('div', { class: 'prm' }, body), top = H('div', { class: 'prm-top' }, row);
+      var lab = H('label', { for: 'r-' + p.key }, top, p.label);
+      var info = H('button', { class: 'info', type: 'button', 'aria-label': 'Откуда значение', 'aria-expanded': 'false' }, lab, 'ⓘ');
+      var out = H('output', { id: 'o-' + p.key, for: 'r-' + p.key }, top);
+      var r = H('input', { type: 'range', id: 'r-' + p.key, min: p.min, max: p.max, step: p.step, value: st[p.key] }, row);
+      var src = H('div', { class: 'prm-src' }, row, 'Источник: ' + p.source + ' · диапазон ' + fmtP(p, p.min) + ' – ' + fmtP(p, p.max));
+      src.hidden = true;
+      info.addEventListener('click', function (ev) { ev.preventDefault(); src.hidden = !src.hidden; info.setAttribute('aria-expanded', String(!src.hidden)); });
+      r.addEventListener('input', function () { st[p.key] = +r.value; fixShares(st, p.key); schedule(); });
+      inputs[p.key] = { r: r, out: out, p: p };
+    });
+    if (g === 2) H('div', { class: 'derived', id: 'd-shmonth' }, body);
+  });
+}
+var modelBtns = [];
+function buildModelBox(body) {
+  var seg = H('div', { class: 'seg', role: 'group', 'aria-label': 'Модель' }, body);
+  E.models.forEach(function (m) {
+    var b = H('button', { type: 'button', title: m.note + ' · ' + m.slug }, seg, m.name);
+    b.addEventListener('click', function () { st.p_in = m.p_in; st.p_out = m.p_out; schedule(); });
+    modelBtns.push({ b: b, m: m });
+  });
+  var own = H('button', { type: 'button', disabled: '' }, seg, 'свои цены'); modelBtns.push({ b: own, m: null });
+  var box = H('div', { class: 'num-in' }, body);
+  [['p_in', 'свои цены: вход, $ за 1 млн'], ['p_out', 'выход, $ за 1 млн'], ['usd', 'курс доллара, ₽']].forEach(function (x) {
+    var p = PARAM[x[0]], l = H('label', null, box, x[1]);
+    var inp = H('input', { type: 'number', min: p.min, max: p.max, step: 'any', value: st[p.key], id: 'n-' + p.key, inputmode: 'decimal' }, l);
+    inp.addEventListener('change', function () {
+      var v = parseFloat(String(inp.value).replace(',', '.'));
+      st[p.key] = isFinite(v) ? clampP(p, v) : p.base; schedule();
+    });
+    inputs[p.key] = { num: inp, p: p };
+  });
+}
+function buildScenarios() {
+  var seg = $('#scn-seg');
+  ['пессимист', 'база', 'оптимист'].forEach(function (name) {
+    if (!E.presets[name]) return;
+    var b = H('button', { type: 'button', 'data-s': name, 'aria-pressed': 'false' }, seg, name);
+    b.addEventListener('click', function () {
+      var keep = { p_in: st.p_in, p_out: st.p_out, usd: st.usd };
+      st = Object.assign(baseState(), E.presets[name], keep); fixShares(st); schedule();
+    });
+  });
+  $('#reset-btn').addEventListener('click', function () { st = baseState(); schedule(); });
+}
+function scenarioOf() {
+  var names = ['пессимист', 'база', 'оптимист'];
+  for (var i = 0; i < names.length; i++) {
+    var s = Object.assign(baseState(), E.presets[names[i]] || {});
+    var ok = E.params.every(function (p) { return ['p_in', 'p_out', 'usd'].indexOf(p.key) >= 0 || Math.abs(s[p.key] - st[p.key]) < 1e-9; });
+    if (ok) return names[i];
+  }
+  return null;
+}
+var TILES = [
+  { k: 'payers', l: 'Платящих в месяц', f: function (v) { return num(v, 1); } },
+  { k: 'rev_payer', l: 'Выручка на платящего', f: rub },
+  { k: 'contrib', l: 'Вклад на платящего после привлечения', f: rub },
+  { k: 'ltv_cac', l: 'LTV / CAC', f: function (v) { return num(v, 2) + '×'; }, s: '≥ 3 — здоровая экономика' },
+  { k: 'profit_month', l: 'Прибыль в месяц', f: rub, s: 'до разработки' },
+  { k: 'be_month', l: 'Безубыточность, платящих в месяц', f: function (v) { return isFinite(v) ? num(v) : 'не окупается'; } },
+  { k: 'payback', l: 'Окупаемость разработки', f: function (v) { return isFinite(v) ? num(v, 1) + ' мес' : 'не окупается'; } }
+];
+var tileEls = {};
+function buildTiles() {
+  var host = $('#otiles');
+  TILES.forEach(function (t) {
+    var d = H('div', { class: 'tile' }, host);
+    H('div', { class: 'lab' }, d, t.l); tileEls[t.k] = { v: H('div', { class: 'val' }, d), s: H('div', { class: 'sub' }, d) }; tileEls[t.k].t = t;
+  });
+}
+var pending = false;
+function schedule() { if (pending) return; pending = true; requestAnimationFrame(function () { pending = false; update(); }); }
+var OUT = null;
+function update() {
+  OUT = compute(st);
+  Object.keys(inputs).forEach(function (k) {
+    var x = inputs[k], p = x.p;
+    if (x.r) {
+      if (+x.r.value !== st[k]) x.r.value = st[k];
+      x.out.replaceChildren(); x.out.append(fmtP(p, st[k]));
+      if (Math.abs(st[k] - p.base) > 1e-12) { var sm = H('small', null, x.out, 'база ' + fmtP(p, p.base)); }
+      x.r.setAttribute('aria-valuetext', fmtP(p, st[k]));
+    }
+    if (x.num && document.activeElement !== x.num) x.num.value = +st[k].toFixed(4);
+  });
+  var dm = $('#d-shmonth'); if (dm) dm.textContent = 'Доля покупок «месяц» (остаток): ' + pct(OUT.sh_month) + ' · средний чек ' + rub(OUT.check) + ' · дней подписки на покупку ' + num(OUT.sub_days, 1);
+  modelBtns.forEach(function (x) {
+    var on = x.m ? (Math.abs(x.m.p_in - st.p_in) < 1e-9 && Math.abs(x.m.p_out - st.p_out) < 1e-9) : !modelBtns.some(function (y) { return y.m && Math.abs(y.m.p_in - st.p_in) < 1e-9 && Math.abs(y.m.p_out - st.p_out) < 1e-9; });
+    x.b.setAttribute('aria-pressed', String(on));
+  });
+  var sc = scenarioOf();
+  $('#scn-seg').querySelectorAll('button').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.s === sc)); });
+  TILES.forEach(function (t) {
+    var e = tileEls[t.k]; e.v.textContent = t.f(OUT[t.k]); e.v.classList.toggle('txt', !isFinite(OUT[t.k]));
+    e.s.textContent = (t.s ? t.s + ' · ' : '') + 'в базе: ' + t.f(BASE_OUT[t.k]);
+  });
+  var ss = $('#sticky-sum'); ss.replaceChildren();
+  [['Прибыль', rub(OUT.profit_month) + '/мес'], ['безубыточность', isFinite(OUT.be_month) ? num(OUT.be_month) : 'нет'],
+    ['окупаемость', isFinite(OUT.payback) ? num(OUT.payback, 1) + ' мес' : 'не окупается']].forEach(function (x) {
+    var sp = H('span', null, ss, x[0] + ': '); H('b', null, sp, x[1]);
+  });
+  renderBeBadge(); renderBdTable(); TOR = tornadoData(); renderNeed(); renderFormulaTable();
+}
+// плашка окупаемости: зелёная, когда прибыль в месяц больше нуля, иначе красная
+function renderBeBadge() {
+  var host = $('#be-badge'); host.replaceChildren();
+  var good = OUT.profit_month > 0;
+  host.className = 'be-badge ' + (good ? 'good' : 'bad');
+  var p1 = H('span', null, host, 'Прибыль в месяц: '); H('b', null, p1, rub(OUT.profit_month));
+  var p2 = H('span', null, host, good ? 'окупает разработку за: ' : 'статус: ');
+  H('b', null, p2, good ? (isFinite(OUT.payback) ? num(OUT.payback, 1) + ' мес' : 'не окупает разработку') : 'не окупается');
+  var p3 = H('span', null, host);
+  if (isFinite(OUT.be_month)) {
+    var gap = OUT.be_month - OUT.payers;
+    p3.append('запас: '); H('b', null, p3, num(OUT.payers, 1) + ' из ' + num(OUT.be_month) + ' платящих для безубыточности');
+    if (gap > 0.05) p3.append(' (не хватает ' + num(gap, 1) + ')');
+  } else { p3.append('запас: '); H('b', null, p3, 'безубыточность недостижима при текущем вкладе на платящего'); }
+}
+// иерархическая разбивка доходов и расходов в месяц — вместо кривой, которая «прыгала» при каждом ползунке
+function renderBdTable() {
+  var host = $('#bd-table'); host.replaceChildren();
+  var modelDialog = OUT.model_paid * OUT.payers, modelFree = OUT.free_month, modelParse = OUT.extract;
+  var modelTotal = modelDialog + modelFree + modelParse;
+  var supportTotal = OUT.support_h * OUT.rate, fixedTotal = OUT.hosting + supportTotal;
+  var acqAmt = OUT.revenue_month * OUT.acq, taxAmt = OUT.revenue_month * OUT.tax, adminAmt = OUT.revenue_month * OUT.admin_share;
+  var shareTotal = acqAmt + taxAmt + adminAmt, cacTotal = OUT.payers * OUT.cac;
+  var tb = H('tbody', null, host);
+  function grp(label) { H('td', { colspan: 2 }, H('tr', { class: 'grp' }, tb), label); }
+  function row(label, val, cls) { var tr = H('tr', { class: cls || 'sub' }, tb); H('td', null, tr, label); H('td', { class: 'n' }, tr, val); }
+  grp('Доходы');
+  row('Платящих в месяц', num(OUT.payers, 1) + ' чел.');
+  row('Выручка на платящего', rub(OUT.rev_payer));
+  row('Выручка в месяц', rub(OUT.revenue_month), 'total');
+  grp('Расходы — модель (ИИ)');
+  row('Диалог с платящими', rub(modelDialog));
+  row('Бесплатные сообщения', rub(modelFree));
+  row('Разбор объявлений (фон)', rub(modelParse));
+  row('Итого модель', rub(modelTotal) + ' (' + pct(OUT.revenue_month ? modelTotal / OUT.revenue_month : 0, 1) + ' от выручки)', 'total');
+  grp('Постоянные расходы');
+  row('Сервер', rub(OUT.hosting));
+  row('Поддержка (' + num(OUT.support_h, 1) + ' ч × ' + rub(OUT.rate) + ')', rub(supportTotal));
+  row('Итого постоянные', rub(fixedTotal), 'total');
+  grp('Доли от выручки');
+  row('Эквайринг (' + pct(OUT.acq, 1) + ')', rub(acqAmt));
+  row('Налог (' + pct(OUT.tax, 1) + ')', rub(taxAmt));
+  row('Админ партнёрского канала (' + pct(OUT.admin_share, 1) + ')', rub(adminAmt));
+  row('Итого доли', rub(shareTotal), 'total');
+  grp('Привлечение');
+  row('CAC × платящих в месяц', rub(cacTotal), 'total');
+  grp('Итого');
+  row('Прибыль в месяц', rub(OUT.profit_month), 'total');
+  var modelShare = OUT.revenue_month ? modelTotal / OUT.revenue_month : 0;
+  var base = OUT.contrib > 0
+    ? 'Каждый платящий приносит ' + rub(OUT.contrib) + ' после привлечения; весь список статей — ниже, от выручки до прибыли.'
+    : 'Вклад платящего ' + rub(OUT.contrib) + ' — не больше нуля: с ростом числа платящих убыток только растёт.';
+  $('#curve-sub').textContent = base + ' Модель — ' + pct(modelShare, 1) + ' от выручки: курс доллара и цены модели почти ' +
+    'не влияют на прибыль, даже бесплатная модель не перекроет постоянные расходы и привлечение — для этого нужны охват, ' +
+    'конверсия или цена подписки (раздел «хватит одного из» ниже).';
+}
+// торнадо больше не рисуется отдельной главой, но его данные (±20% по каждому параметру) всё ещё
+// питают «хватит одного из» ниже (renderNeed) — отсюда и название остаётся tornadoData
+var TOR = [];
+function tornadoData() {
+  var p0 = OUT.profit_month;
+  return SLIDERS.map(function (p) {
+    var lo = clampP(p, st[p.key] * 0.8), hi = clampP(p, st[p.key] * 1.2);
+    var yl = evalWith(st, p.key, lo).profit_month, yh = evalWith(st, p.key, hi).profit_month;
+    return { p: p, lo: lo, hi: hi, dl: yl - p0, dh: yh - p0, swing: Math.abs(yh - yl) };
+  }).sort(function (a, b) { return b.swing - a.swing; });
+}
+// подбор: какое значение одного рычага даёт окупаемость разработки ≤ 12 мес (прибыль в месяц ≥ разработка / 12)
+function solve(key) {
+  var p = PARAM[key];
+  function ok(x) { var v = evalWith(st, key, x); return v.profit_month > 0 && v.profit_month - v.dev / 12 >= 0; }
+  var cur = st[key], c0 = ok(cur), N = 240, best = null, top = { y: -Infinity, x: cur };
+  for (var i = 0; i <= N; i++) {
+    var x = p.min + (p.max - p.min) * i / N;
+    if (ok(x) !== c0 && (best === null || Math.abs(x - cur) < Math.abs(best - cur))) best = x;
+    var y = evalWith(st, key, x).profit_month; if (y > top.y) top = { y: y, x: x };
+  }
+  if (best === null) return { reach: c0, none: true, top: top };
+  var a = cur, b = best;
+  var gs = (p.max - p.min) / N, near = best > cur ? Math.max(cur, best - gs) : Math.min(cur, best + gs);
+  if (ok(near) === c0) a = near;
+  for (var j = 0; j < 60; j++) { var mid = (a + b) / 2; if (ok(mid) === c0) a = mid; else b = mid; }
+  return { reach: c0, x: c0 ? a : b, up: best > cur };
+}
+// тот же порог за пределами ползунка: бисекция по расширенному диапазону (доли — до 1, остальное — до ×100 от текущего)
+function solveWide(key) {
+  var p = PARAM[key]; if (!p) return null;
+  var cur = st[key], hi = p.unit === 'доля' ? 1 : cur * 100;
+  function ok(x) { var v = evalWith(st, key, x); return v.profit_month > 0 && v.profit_month - v.dev / 12 >= 0; }
+  if (ok(cur) || !ok(hi)) return null;
+  var a = cur, b = hi;
+  for (var j = 0; j < 100; j++) { var mid = (a + b) / 2; if (ok(mid)) b = mid; else a = mid; }
+  return b;
+}
+var WIDE = [['reach', 'охват', function (x) { return num(x / 1000) + ' тыс. ищущих в месяц'; }],
+  ['c_pay', 'конверсия в оплату', function (x) { return pct(x, 1); }],
+  ['apc', 'APC', function (x) { return num(x, 1) + ' покупки на платящего'; }]];
+function renderNeed() {
+  var host = $('#need'); host.replaceChildren();
+  var already = isFinite(OUT.payback) && OUT.payback <= 12;
+  var levers = TOR.filter(function (r) { return r.swing > 1e-6; }).slice(0, 6);
+  var res = levers.map(function (r) { return solve(r.p.key); });
+  var noneAll = !already && res.every(function (x) { return x.none; });
+  H('h3', null, host, already ? 'Уже окупается за ' + num(OUT.payback, 1) + ' мес. Запас: окупаемость останется ≤ 12 мес, пока ОДИН рычаг не дойдёт до:'
+    : 'Чтобы окупиться за 12 месяцев, хватит ОДНОГО из:');
+  if (noneAll) H('p', { class: 'derived', style: 'margin:0 0 8px' }, host, 'Сейчас — ни одного: в одиночку ни один рычаг не вытягивает даже на всём своём диапазоне. ' +
+    'Нужно двигать несколько сразу — например, сценарий «оптимист». Ниже — лучшее, чего достигает каждый рычаг.');
+  var ol = H('ol', null, host);
+  levers.forEach(function (r, i) {
+    var x = res[i], li = H('li', null, ol);
+    H('b', null, li, short(r.p.label));
+    if (x.none && already) { li.append(': '); H('span', { class: 'na' }, li, 'держится во всём диапазоне'); }
+    else if (x.none) {
+      li.append(': '); H('span', { class: 'na' }, li, 'недостижимо; лучшее — ' + rub(x.top.y) + '/мес при ' + fmtP(r.p, x.top.x));
+    } else {
+      li.append(': ' + fmtP(r.p, st[r.p.key]) + ' → ' + fmtP(r.p, x.x, Math.abs(x.x) < 100 ? 1 : 0));
+    }
+  });
+  if (noneAll) {
+    var wide = WIDE.map(function (w) {
+      var x = solveWide(w[0]); if (x === null) return null;
+      var k = st[w[0]] === PARAM[w[0]].base ? ' к базе' : ' к текущему';
+      return w[1] + ' ≥ ' + w[2](x) + ' (×' + num(x / st[w[0]], 1) + k + ')';
+    }).filter(Boolean);
+    if (wide.length) {
+      var pw = H('p', { style: 'margin:10px 0 0;font-size:14px' }, host);
+      H('b', null, pw, 'За пределами ползунков: ');
+      pw.append(wide.join(', или ') + ' — каждое по отдельности нереально.');
+    }
+  }
+  H('div', { class: 'derived' }, host, 'Рычаги — шесть параметров с самым сильным влиянием на прибыль при сдвиге на ±20%; подбор — бисекцией по формулам модели, остальные параметры как сейчас. Разработка ' + rub(OUT.dev) + ', нужно ≥ ' + rub(OUT.dev / 12) + ' прибыли в месяц.');
+}
+var formulaBuilt = false, fCells = {};
+function unitFmt(v, unit) {
+  if (!isFinite(v)) return 'не окупается';
+  if (unit === 'доля') return pct(v, 1);
+  if (unit === '$') return '$' + num(v, 6);
+  if (unit === '₽' && Math.abs(v) < 10) return num(v, 3) + ' ₽';
+  return num(v, Math.abs(v) < 100 ? 2 : 0) + ' ' + unit;
+}
+function renderFormulaTable() {
+  if (!formulaBuilt) {
+    var t = table($('#formula-table'), ['Показатель', 'Словами', 'Формула', 'Сейчас'], [], [3]);
+    var tb = t.querySelector('tbody');
+    E.formulas.forEach(function (f) {
+      var tr = H('tr', null, tb); H('td', null, tr, f.label); H('td', null, tr, f.words);
+      var c = H('td', null, tr); H('code', null, c, f.expr); fCells[f.key] = H('td', { class: 'n' }, tr);
+    });
+    var fixed = E.params.filter(function (p) { return !p.slider; });
+    table($('#fixed-table'), ['Допущение', 'Значение', 'Источник'], fixed.map(function (p) { return [p.label, fmtP(p, p.base), p.source]; }), [1]);
+    formulaBuilt = true;
+  }
+  E.formulas.forEach(function (f) { fCells[f.key].textContent = unitFmt(OUT[f.key], f.unit); });
+}
+
+// ---------- тема ----------
+var THEMES = ['auto', 'light', 'dark'], THEME_RU = { auto: 'авто', light: 'светлая', dark: 'тёмная' };
+function setTheme(t) {
+  if (t === 'auto') document.documentElement.removeAttribute('data-theme'); else document.documentElement.setAttribute('data-theme', t);
+  $('#theme-btn').textContent = 'Тема: ' + THEME_RU[t];
+  try { localStorage.setItem('rent-theme', t); } catch (e) { /* хранилище недоступно */ }
+}
+function initTheme() {
+  var q = (location.hash + '&' + location.search).match(/theme=(light|dark|auto)/), t = 'auto';
+  if (q) t = q[1]; else { try { t = localStorage.getItem('rent-theme') || 'auto'; } catch (e) { t = 'auto'; } }
+  if (THEMES.indexOf(t) < 0) t = 'auto';
+  setTheme(t);
+  $('#theme-btn').addEventListener('click', function () {
+    var cur = document.documentElement.getAttribute('data-theme') || 'auto';
+    setTheme(THEMES[(THEMES.indexOf(cur) + 1) % 3]);
+  });
+}
+
+// ---------- запуск ----------
+function renderCharts() { renderScatter(); renderDrivers(); renderFlow(); if (OUT) { renderBdTable(); } }
+initTheme();
+renderKpis(); scatterStatic(); bindIce(); drvStatic(); flowStatic(); renderExtract();
+buildScenarios(); buildModelBox($('#model-bar')); buildTiles(); buildParams();
+renderScatter(); renderDrivers(); renderFlow();
+update();
+var lastW = innerWidth, rt = null;
+window.addEventListener('resize', function () {
+  if (innerWidth === lastW) return; lastW = innerWidth;
+  clearTimeout(rt); rt = setTimeout(renderCharts, 150);
+});
+var fd = $('#foot-dates');
+var cianKey = Object.keys(D.flow.summary).find(function (k) { return /всего собрано/.test(k); });
+var cianDates = cianKey && (cianKey.match(/\(([^)]+)\)/) || [])[1];
+fd.textContent = 'Данные: Telegram — ' + monLabel(D.flow.months[0], true) + ' – ' + monLabel(D.flow.months[D.flow.months.length - 1], true) +
+  (cianDates ? '; Циан — ' + cianDates : '') + '; курс доллара на ' + E.usd_rate_date + '; страница собрана ' + document.body.dataset.built + '.';
+if (/debug/.test(location.hash)) { // проверка вёрстки: что вылезает за ширину окна
+  setTimeout(function () {
+    var over = [];
+    document.querySelectorAll('body *').forEach(function (el) {
+      var r = el.getBoundingClientRect();
+      if (r.width && (r.right > innerWidth + 0.5 || r.left < -0.5) && !el.closest('#tip') && !el.closest('details:not([open])')) over.push((el.id || el.tagName) + ':' + Math.round(r.right));
+    });
+    var pre = H('pre', { id: 'dbg' }, document.body, JSON.stringify({ sw: document.documentElement.scrollWidth, iw: innerWidth, over: over.slice(0, 20) }));
+  }, 300);
+}
+})();
+</script>
+</body>
+</html>

@@ -11,7 +11,7 @@
 
 ## 3. Структура репозитория
 - `docs/` — дашборд (GitHub Pages): водопад драйверов, надёжность цены, калькулятор юнит-экономики.
-- `data/` — обезличенные данные: `offers_clean.csv`, `cleaning_log.csv`, `agent_log.csv`, `econ_model.json`, `economics.xlsx`.
+- `data/` — обезличенные данные: `offers_raw.csv`, `offers_clean.csv`, `cleaning_log.csv`, `agent_log.csv`, `econ_model.json`, `economics.xlsx`.
 - `notebooks/` — `data_analysis.ipynb` (этапы 2–3), `agent.ipynb` (этап 5).
 - `pipeline/` — схема карточки, системный промпт, сценарий n8n, оценка на эталоне.
 - `collect/` — сбор и сборка: парсер Циана (координаты зон убраны), выгрузка OSM, склейка источников, сборка дашборда.
